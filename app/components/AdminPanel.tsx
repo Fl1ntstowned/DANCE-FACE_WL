@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { getApiUrl } from '../lib/api';
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -38,7 +39,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/admin/login`, {
+      const response = await fetch(`${getApiUrl()}/api/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -64,7 +65,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
   const fetchWallets = async (authToken: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/admin/wallets`, {
+      const response = await fetch(`${getApiUrl()}/api/admin/wallets`, {
         headers: { 
           'Authorization': authToken 
         }

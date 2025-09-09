@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
+import { getApiUrl } from './lib/api';
 import AdminPanel from './components/AdminPanel';
 import RhythmMeter from './components/RhythmMeter';
 import './ddr-effects.css';
@@ -93,7 +94,7 @@ export default function Home() {
     setMessage('');
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/whitelist`, {
+      const response = await fetch(`${getApiUrl()}/api/whitelist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
