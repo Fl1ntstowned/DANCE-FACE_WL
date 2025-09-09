@@ -124,27 +124,35 @@ const MonkeyHead = forwardRef<THREE.Group>((props, ref) => {
         />
       </mesh>
 
-      {/* Simple round eyes - more visible */}
+      {/* Simple cartoon eyes - fully visible */}
       {[-1, 1].map((side, index) => (
         <group key={`eye-${index}`}>
-          {/* White of eye */}
+          {/* White of eye - larger oval */}
           <mesh
-            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.92]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.9]}
+            scale={[1, 1.3, 1]}
           >
-            <circleGeometry args={[headConfig.size * 0.12, 32]} />
+            <sphereGeometry args={[headConfig.size * 0.1, 16, 16]} />
             <meshBasicMaterial
               color={0xFFFFFF}
-              side={THREE.DoubleSide}
             />
           </mesh>
-          {/* Pupil */}
+          {/* Black pupil */}
           <mesh
-            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.93]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.95]}
           >
-            <circleGeometry args={[headConfig.size * 0.08, 32]} />
+            <sphereGeometry args={[headConfig.size * 0.05, 16, 16]} />
             <meshBasicMaterial
-              color={headConfig.eyeColor}
-              side={THREE.DoubleSide}
+              color={0x000000}
+            />
+          </mesh>
+          {/* Small white highlight for life */}
+          <mesh
+            position={[side * headConfig.size * 0.23, headConfig.size * 0.22, headConfig.size * 0.97]}
+          >
+            <sphereGeometry args={[headConfig.size * 0.015, 8, 8]} />
+            <meshBasicMaterial
+              color={0xFFFFFF}
             />
           </mesh>
         </group>

@@ -2,7 +2,7 @@
 
 import { useRef, Suspense, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, useAnimations, Environment } from '@react-three/drei';
+import { OrbitControls, useGLTF, useAnimations } from '@react-three/drei';
 import { EffectComposer, Bloom, Scanline, ChromaticAberration, Glitch } from '@react-three/postprocessing';
 import { GlitchMode } from 'postprocessing';
 import * as THREE from 'three';
@@ -45,13 +45,13 @@ function Model() {
                   normalMap: (mat as THREE.MeshStandardMaterial).normalMap,
                   color: (mat as THREE.MeshStandardMaterial).color,
                   emissive: (mat as THREE.MeshStandardMaterial).emissive || new THREE.Color(0x000000),
-                  emissiveIntensity: 0.05, // Subtle self-illumination
-                  roughness: 0.15, // Slightly more roughness for realism
-                  metalness: 0.2, // Much less metallic
-                  clearcoat: 1.0, // Maximum clear coat
-                  clearcoatRoughness: 0.05, // Very smooth clear coat
-                  reflectivity: 0.6, // Moderate reflectivity
-                  envMapIntensity: 1.2, // Balanced environment reflections
+                  emissiveIntensity: 0.02, // Very subtle self-illumination
+                  roughness: 0.25, // More roughness to reduce shine
+                  metalness: 0.15, // Reduced metallic
+                  clearcoat: 0.7, // Reduced clear coat
+                  clearcoatRoughness: 0.15, // Slightly rougher clear coat
+                  reflectivity: 0.4, // Lower reflectivity
+                  envMapIntensity: 0.6, // Much lower environment reflections
                   ior: 1.45, // Index of refraction
                   sheen: 0.5, // Moderate sheen
                   sheenRoughness: 0.1,
@@ -91,7 +91,7 @@ function Model() {
       monkeyRef.current.position.copy(worldPos);
       monkeyRef.current.position.x += 0.05; // Slightly right to center better
       monkeyRef.current.position.y += 0.4; // Offset above head
-      monkeyRef.current.position.z -= 0.25; // Move back more to avoid hand collision
+      monkeyRef.current.position.z -= 0.3; // Move back a tiny bit more to avoid hand collision
       monkeyRef.current.position.y += Math.sin(state.clock.elapsedTime * 2) * 0.05;
     } else if (monkeyRef.current) {
       // Fallback if no head bone found
@@ -182,34 +182,12 @@ export default function ModelViewer() {
         <color attach="background" args={['#000']} />
         <fog attach="fog" args={['#000', 5, 15]} />
         
-        <ambientLight intensity={0.3} />
-        <pointLight position={[10, 10, 10]} intensity={1.5} color="#ffffff" />
-        <pointLight position={[-10, -10, -10]} intensity={0.8} color="#ffffff" />
-        <directionalLight position={[0, 10, 5]} intensity={0.5} color="#ffffff" />
-        <spotLight
-          position={[0, 5, 0]}
-          angle={0.3}
-          penumbra={1}
-          intensity={2}
-          color="#00ff00"
-          castShadow
-        />
-        
-        {/* DDR Style Moving Lights */}
-        <pointLight 
-          position={[Math.sin(Date.now() * 0.001) * 5, 3, Math.cos(Date.now() * 0.001) * 5]} 
-          intensity={2} 
-          color="#ffff00" 
-        />
-        <pointLight 
-          position={[Math.cos(Date.now() * 0.002) * 5, -3, Math.sin(Date.now() * 0.002) * 5]} 
-          intensity={2} 
-          color="#ff00ff" 
-        />
+        {/* Simple lighting like mobile version */}
+        <ambientLight intensity={0.5} />
+        <directionalLight position={[0, 10, 5]} intensity={0.8} color="#ffffff" />
         
         <Suspense fallback={null}>
-          {/* Add environment for reflections */}
-          <Environment preset="studio" />
+          {/* Removed Environment preset to reduce washing out */}
           <Model />
           <LaserGrid />
         </Suspense>
@@ -223,10 +201,10 @@ export default function ModelViewer() {
         
         <EffectComposer>
           <Bloom 
-            intensity={1.2}
-            luminanceThreshold={0.3}
+            intensity={0.8}
+            luminanceThreshold={0.5}
             luminanceSmoothing={0.9}
-            radius={0.6}
+            radius={0.4}
           />
           <Scanline density={2} opacity={0.15} />
           <ChromaticAberration offset={new THREE.Vector2(0.002, 0.002)} />
