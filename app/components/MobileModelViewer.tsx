@@ -64,9 +64,9 @@ function SimplifiedModel() {
       
       // Position monkey head above the head bone
       monkeyRef.current.position.copy(worldPos);
-      monkeyRef.current.position.x += 0.05; // Slightly right to center better
+      monkeyRef.current.position.x += 0.02; // Tiny bit left (was 0.05)
       monkeyRef.current.position.y += 0.4; // Offset above head
-      monkeyRef.current.position.z -= 0.3; // Move back a tiny bit more to avoid hand collision
+      monkeyRef.current.position.z -= 0.28; // Tiny bit forward (was -0.3)
       monkeyRef.current.position.y += Math.sin(state.clock.elapsedTime * 2) * 0.05;
     } else if (monkeyRef.current) {
       // Fallback if no head bone found

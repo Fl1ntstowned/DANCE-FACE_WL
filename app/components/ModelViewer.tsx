@@ -3,8 +3,6 @@
 import { useRef, Suspense, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, useAnimations } from '@react-three/drei';
-import { EffectComposer, Bloom, Scanline, ChromaticAberration, Glitch } from '@react-three/postprocessing';
-import { GlitchMode } from 'postprocessing';
 import * as THREE from 'three';
 import MonkeyHead from './MonkeyHead';
 
@@ -89,9 +87,9 @@ function Model() {
       
       // Position monkey head above the head bone
       monkeyRef.current.position.copy(worldPos);
-      monkeyRef.current.position.x += 0.05; // Slightly right to center better
+      monkeyRef.current.position.x += 0.02; // Tiny bit left (was 0.05)
       monkeyRef.current.position.y += 0.4; // Offset above head
-      monkeyRef.current.position.z -= 0.3; // Move back a tiny bit more to avoid hand collision
+      monkeyRef.current.position.z -= 0.28; // Tiny bit forward (was -0.3)
       monkeyRef.current.position.y += Math.sin(state.clock.elapsedTime * 2) * 0.05;
     } else if (monkeyRef.current) {
       // Fallback if no head bone found
@@ -128,68 +126,19 @@ function Model() {
   );
 }
 
-function LaserGrid() {
-  const meshRef = useRef<THREE.Mesh>(null);
-  
-  useFrame((state) => {
-    if (meshRef.current && meshRef.current.material) {
-      const material = meshRef.current.material as THREE.ShaderMaterial;
-      material.uniforms.time.value = state.clock.elapsedTime;
-    }
-  });
-
-  const vertexShader = `
-    varying vec2 vUv;
-    void main() {
-      vUv = uv;
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `;
-
-  const fragmentShader = `
-    uniform float time;
-    varying vec2 vUv;
-    
-    void main() {
-      float grid = step(0.98, max(sin(vUv.x * 20.0), sin(vUv.y * 20.0)));
-      float scanline = smoothstep(0.0, 0.1, abs(sin(vUv.y * 2.0 - time * 2.0)));
-      
-      vec3 color = vec3(0.0, 1.0, 1.0) * grid * scanline;
-      gl_FragColor = vec4(color, grid * 0.5);
-    }
-  `;
-
-  return (
-    <mesh ref={meshRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.5, 0]}>
-      <planeGeometry args={[6, 6, 32, 32]} />
-      <shaderMaterial
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={{
-          time: { value: 0 }
-        }}
-        transparent
-        side={THREE.DoubleSide}
-      />
-    </mesh>
-  );
-}
 
 export default function ModelViewer() {
   return (
     <div className="w-full h-[400px] md:h-[500px] lg:h-[600px] relative rounded-xl md:rounded-2xl overflow-hidden bg-black/50 backdrop-blur-md electric-border shadow-[0_0_50px_rgba(0,255,255,0.3)]">
       <Canvas camera={{ position: [0, 0, 5], fov: 50 }}>
         <color attach="background" args={['#000']} />
-        <fog attach="fog" args={['#000', 5, 15]} />
         
-        {/* Simple lighting like mobile version */}
+        {/* EXACT same lighting as mobile */}
         <ambientLight intensity={0.5} />
         <directionalLight position={[0, 10, 5]} intensity={0.8} color="#ffffff" />
         
         <Suspense fallback={null}>
-          {/* Removed Environment preset to reduce washing out */}
           <Model />
-          <LaserGrid />
         </Suspense>
         
         <OrbitControls 
@@ -199,24 +148,7 @@ export default function ModelViewer() {
           minPolarAngle={Math.PI / 3}
         />
         
-        <EffectComposer>
-          <Bloom 
-            intensity={0.8}
-            luminanceThreshold={0.5}
-            luminanceSmoothing={0.9}
-            radius={0.4}
-          />
-          <Scanline density={2} opacity={0.15} />
-          <ChromaticAberration offset={new THREE.Vector2(0.002, 0.002)} />
-          <Glitch 
-            delay={new THREE.Vector2(3, 6)}
-            duration={new THREE.Vector2(0.1, 0.3)}
-            strength={new THREE.Vector2(0.1, 0.2)}
-            mode={GlitchMode.SPORADIC}
-            active
-            ratio={0.15}
-          />
-        </EffectComposer>
+        {/* Removed all post-processing effects to match mobile exactly */}
       </Canvas>
       
       <div className="absolute top-2 left-2 md:top-4 md:left-4 text-cyan-400 font-mono text-xs md:text-sm">
