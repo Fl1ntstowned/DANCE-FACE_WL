@@ -124,35 +124,100 @@ const MonkeyHead = forwardRef<THREE.Group>((props, ref) => {
         />
       </mesh>
 
-      {/* Simple cartoon eyes - fully visible */}
+      {/* 3D Half-dome bloodshot eyes */}
       {[-1, 1].map((side, index) => (
         <group key={`eye-${index}`}>
-          {/* White of eye - larger oval */}
+          {/* Eye socket base for depth */}
           <mesh
-            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.9]}
-            scale={[1, 1.3, 1]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.85]}
           >
-            <sphereGeometry args={[headConfig.size * 0.1, 16, 16]} />
+            <sphereGeometry args={[headConfig.size * 0.12, 16, 16, 0, Math.PI]} />
             <meshBasicMaterial
-              color={0xFFFFFF}
+              color={0x2a1515}  // Dark red-brown socket
+              side={THREE.BackSide}
             />
           </mesh>
-          {/* Black pupil */}
+          
+          {/* Main eye - half dome protruding out */}
+          <mesh
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.9]}
+            rotation={[0, side * 0.15, 0]}  // Slight angle for realism
+          >
+            <sphereGeometry args={[
+              headConfig.size * 0.11,  // radius
+              32,  // width segments
+              16,  // height segments
+              0,  // phiStart
+              Math.PI * 2,  // phiLength
+              0,  // thetaStart  
+              Math.PI / 2  // thetaLength - half sphere
+            ]} />
+            <meshPhysicalMaterial
+              color={0xFFE0E0}  // Light pink-white base
+              emissive={0xFF0000}  // Red glow
+              emissiveIntensity={0.05}
+              roughness={0.3}
+              clearcoat={0.8}  // Wet look
+              clearcoatRoughness={0.1}
+            />
+          </mesh>
+          
+          {/* Red veins overlay */}
+          <mesh
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.91]}
+            rotation={[0, side * 0.15, 0]}
+          >
+            <sphereGeometry args={[
+              headConfig.size * 0.105,
+              16,
+              8,
+              0,
+              Math.PI * 2,
+              0,
+              Math.PI / 2
+            ]} />
+            <meshBasicMaterial
+              color={0xFF6B6B}  // Bloodshot red
+              transparent={true}
+              opacity={0.3}
+            />
+          </mesh>
+          
+          {/* Iris - colored ring */}
           <mesh
             position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.95]}
           >
-            <sphereGeometry args={[headConfig.size * 0.05, 16, 16]} />
+            <ringGeometry args={[
+              headConfig.size * 0.04,  // inner radius
+              headConfig.size * 0.07,  // outer radius
+              32  // segments
+            ]} />
             <meshBasicMaterial
-              color={0x000000}
+              color={0x8B4513}  // Brown iris
+              side={THREE.DoubleSide}
             />
           </mesh>
-          {/* Small white highlight for life */}
+          
+          {/* Black pupil - clearly visible in center */}
           <mesh
-            position={[side * headConfig.size * 0.23, headConfig.size * 0.22, headConfig.size * 0.97]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.96]}
           >
-            <sphereGeometry args={[headConfig.size * 0.015, 8, 8]} />
+            <circleGeometry args={[headConfig.size * 0.04, 32]} />
+            <meshBasicMaterial
+              color={0x000000}  // Pure black
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          
+          {/* Glossy highlight */}
+          <mesh
+            position={[side * headConfig.size * 0.22, headConfig.size * 0.23, headConfig.size * 0.97]}
+          >
+            <sphereGeometry args={[headConfig.size * 0.02, 8, 8]} />
             <meshBasicMaterial
               color={0xFFFFFF}
+              transparent={true}
+              opacity={0.9}
             />
           </mesh>
         </group>
