@@ -1,0 +1,217 @@
+/* Mobile Performance Optimizations */
+
+/* Disable heavy animations on mobile */
+@media (max-width: 768px) {
+  /* Disable all particle animations */
+  .particle {
+    animation: none !important;
+    display: none !important;
+  }
+  
+  /* Disable arrow rain animations */
+  .arrow-rain,
+  .arrow-fall {
+    animation: none !important;
+    display: none !important;
+  }
+  
+  /* Simplify radar sweep */
+  .radar-sweep {
+    animation: none !important;
+    display: none !important;
+  }
+  
+  /* Disable TV static effect */
+  .tv-static {
+    animation: none !important;
+    background-image: none !important;
+  }
+  
+  /* Simplify scanlines */
+  .scanlines::before {
+    animation: none !important;
+    display: none !important;
+  }
+  
+  /* Reduce glitch effects */
+  .glitch-text::before,
+  .glitch-text::after {
+    animation: none !important;
+    display: none !important;
+  }
+  
+  /* Simplify holographic text */
+  .holographic-text {
+    animation: holographic 6s ease infinite !important; /* Slower animation */
+    background-size: 200% 200% !important; /* Smaller gradient */
+  }
+  
+  /* Simplify chrome animations */
+  .chrome-animated {
+    animation: chrome-shine 6s linear infinite !important; /* Slower animation */
+  }
+  
+  /* Reduce neon glow intensity */
+  .neon-glow {
+    text-shadow: 
+      0 0 5px currentColor,
+      0 0 10px currentColor !important;
+  }
+  
+  /* Simplify electric border */
+  .electric-border {
+    animation: electric-border 4s linear infinite !important; /* Slower animation */
+    box-shadow: 0 0 10px rgba(0,255,255,0.3) !important; /* Less shadow */
+  }
+  
+  /* Disable perspective card animation */
+  .perspective-card {
+    animation: none !important;
+    transform: none !important;
+  }
+  
+  /* Simplify breathing button */
+  .breathing-button {
+    animation: breathe 4s ease-in-out infinite !important; /* Slower animation */
+  }
+  
+  /* Disable cyber grid animation */
+  .cyber-grid {
+    animation: none !important;
+    background-size: 100px 100px !important; /* Larger grid for better performance */
+  }
+  
+  /* Reduce energy bar complexity */
+  .energy-bar {
+    animation: holographic 4s linear infinite !important; /* Single, slower animation */
+  }
+  
+  .energy-bar::after {
+    animation: none !important;
+    display: none !important;
+  }
+  
+  /* Disable floating animations */
+  .animate-float,
+  .animate-float-slow {
+    animation: none !important;
+  }
+  
+  /* Reduce pulse animations */
+  .animate-pulse {
+    animation: pulse 3s ease-in-out infinite !important; /* Slower pulse */
+  }
+  
+  /* Disable spin animations */
+  .animate-spin-slow {
+    animation: none !important;
+  }
+  
+  /* Simplify text 3D effects */
+  .text-3d,
+  .text-3d-title {
+    text-shadow: 
+      0 1px 0 #ccc,
+      0 2px 0 #bbb,
+      0 0 10px currentColor !important;
+    transform: none !important;
+  }
+  
+  /* Disable matrix rain */
+  .matrix-rain {
+    display: none !important;
+  }
+  
+  /* Disable laser beam */
+  .laser-beam {
+    display: none !important;
+  }
+  
+  /* Simplify rainbow border */
+  .rainbow-border {
+    animation: none !important;
+    border-image: linear-gradient(45deg, #ff0000, #00ff00, #0000ff) 1 !important;
+  }
+  
+  /* Performance: Use transform3d for hardware acceleration */
+  * {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+  }
+  
+  /* Reduce animation frame rate */
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+  }
+  
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+  }
+  
+  @keyframes holographic {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 100% 50%; }
+  }
+  
+  @keyframes chrome-shine {
+    0% { background-position: -100% center; }
+    100% { background-position: 100% center; }
+  }
+  
+  @keyframes electric-border {
+    0%, 100% { border-color: #00ffff; }
+    50% { border-color: #ff00ff; }
+  }
+}
+
+/* Additional mobile-specific styles */
+@media (max-width: 768px) and (hover: none) {
+  /* Remove hover effects on touch devices */
+  .explode-hover:hover::after {
+    animation: none !important;
+  }
+  
+  /* Simplify button hover states */
+  button:hover,
+  a:hover {
+    transition: none !important;
+  }
+}
+
+/* Ultra-low performance mode for very slow devices */
+@media (max-width: 768px) and (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+  
+  .neon-glow,
+  .chrome-text,
+  .holographic-text {
+    text-shadow: none !important;
+    background: none !important;
+    color: #00ffff !important;
+    -webkit-text-fill-color: #00ffff !important;
+  }
+}
+
+/* GPU optimization hints */
+@media (max-width: 768px) {
+  .will-change-transform {
+    will-change: transform;
+  }
+  
+  .will-change-opacity {
+    will-change: opacity;
+  }
+  
+  /* Reduce backdrop filters on mobile */
+  .backdrop-blur-xl,
+  .backdrop-blur-md,
+  .backdrop-blur-sm {
+    backdrop-filter: blur(4px) !important;
+  }
+}

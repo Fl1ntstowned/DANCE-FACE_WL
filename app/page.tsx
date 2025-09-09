@@ -4,17 +4,26 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import { useApiUrl } from './hooks/useApiUrl';
+import { useDeviceDetection } from './hooks/useDeviceDetection';
 import AdminPanel from './components/AdminPanel';
 import RhythmMeter from './components/RhythmMeter';
+import PerformanceMonitor from './components/PerformanceMonitor';
 import './ddr-effects.css';
+import './mobile-optimizations.css';
 
 const ModelViewer = dynamic(() => import('./components/ModelViewer'), {
   ssr: false,
   loading: () => <div className="w-full h-[400px] md:h-[500px] lg:h-[600px] bg-black/50 rounded-xl md:rounded-2xl animate-pulse flex items-center justify-center text-cyan-400 text-sm md:text-base">Loading 3D Model...</div>
 });
 
+const MobileModelViewer = dynamic(() => import('./components/MobileModelViewer'), {
+  ssr: false,
+  loading: () => <div className="w-full h-[300px] sm:h-[350px] bg-black/50 rounded-xl animate-pulse flex items-center justify-center text-cyan-400 text-sm">Loading 3D Model...</div>
+});
+
 export default function Home() {
   const apiUrl = useApiUrl();
+  const deviceInfo = useDeviceDetection();
   const [walletAddress, setWalletAddress] = useState('');
   const [twitter, setTwitter] = useState('');
   const [communityName, setCommunityName] = useState('');
@@ -139,6 +148,9 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-black overflow-x-hidden relative scanlines tv-static">
+      {/* Performance Monitor for Development */}
+      {deviceInfo.isMobile && <PerformanceMonitor />}
+      
       {/* Background Audio */}
       <audio
         ref={audioRef}
@@ -279,32 +291,36 @@ export default function Home() {
         <div className="radar-sweep"></div>
       </div>
       
-      {/* Floating Particles */}
-      <div className="fixed inset-0 pointer-events-none z-5">
-        <span className="particle text-4xl" style={{left: '10%', animationDelay: '0s', color: '#00ffff'}}>◆</span>
-        <span className="particle text-3xl" style={{left: '20%', animationDelay: '1s', color: '#ff00ff'}}>●</span>
-        <span className="particle text-5xl" style={{left: '30%', animationDelay: '2s', color: '#ffff00'}}>★</span>
-        <span className="particle text-4xl" style={{left: '40%', animationDelay: '3s', color: '#00ff00'}}>▲</span>
-        <span className="particle text-3xl" style={{left: '50%', animationDelay: '4s', color: '#ff00ff'}}>◆</span>
-        <span className="particle text-5xl" style={{left: '60%', animationDelay: '5s', color: '#00ffff'}}>●</span>
-        <span className="particle text-4xl" style={{left: '70%', animationDelay: '6s', color: '#ffff00'}}>★</span>
-        <span className="particle text-3xl" style={{left: '80%', animationDelay: '7s', color: '#00ff00'}}>▲</span>
-        <span className="particle text-5xl" style={{left: '90%', animationDelay: '8s', color: '#ff00ff'}}>◆</span>
-      </div>
-
-      {/* DDR Arrow Rain Left */}
-      <div className="fixed left-12 md:left-20 lg:left-28 top-0 h-full w-12 overflow-hidden z-10 pointer-events-none">
-        <div className="arrow-rain">
-          <span className="arrow-fall" style={{animationDelay: '0s'}}>↓</span>
-          <span className="arrow-fall" style={{animationDelay: '0.5s'}}>←</span>
-          <span className="arrow-fall" style={{animationDelay: '1s'}}>↑</span>
-          <span className="arrow-fall" style={{animationDelay: '1.5s'}}>→</span>
-          <span className="arrow-fall" style={{animationDelay: '2s'}}>↓</span>
-          <span className="arrow-fall" style={{animationDelay: '2.5s'}}>↑</span>
-          <span className="arrow-fall" style={{animationDelay: '3s'}}>←</span>
-          <span className="arrow-fall" style={{animationDelay: '3.5s'}}>→</span>
+      {/* Floating Particles - Only on desktop */}
+      {deviceInfo.isDesktop && (
+        <div className="fixed inset-0 pointer-events-none z-5">
+          <span className="particle text-4xl" style={{left: '10%', animationDelay: '0s', color: '#00ffff'}}>◆</span>
+          <span className="particle text-3xl" style={{left: '20%', animationDelay: '1s', color: '#ff00ff'}}>●</span>
+          <span className="particle text-5xl" style={{left: '30%', animationDelay: '2s', color: '#ffff00'}}>★</span>
+          <span className="particle text-4xl" style={{left: '40%', animationDelay: '3s', color: '#00ff00'}}>▲</span>
+          <span className="particle text-3xl" style={{left: '50%', animationDelay: '4s', color: '#ff00ff'}}>◆</span>
+          <span className="particle text-5xl" style={{left: '60%', animationDelay: '5s', color: '#00ffff'}}>●</span>
+          <span className="particle text-4xl" style={{left: '70%', animationDelay: '6s', color: '#ffff00'}}>★</span>
+          <span className="particle text-3xl" style={{left: '80%', animationDelay: '7s', color: '#00ff00'}}>▲</span>
+          <span className="particle text-5xl" style={{left: '90%', animationDelay: '8s', color: '#ff00ff'}}>◆</span>
         </div>
-      </div>
+      )}
+
+      {/* DDR Arrow Rain Left - Only on desktop */}
+      {deviceInfo.isDesktop && (
+        <div className="fixed left-12 md:left-20 lg:left-28 top-0 h-full w-12 overflow-hidden z-10 pointer-events-none">
+          <div className="arrow-rain">
+            <span className="arrow-fall" style={{animationDelay: '0s'}}>↓</span>
+            <span className="arrow-fall" style={{animationDelay: '0.5s'}}>←</span>
+            <span className="arrow-fall" style={{animationDelay: '1s'}}>↑</span>
+            <span className="arrow-fall" style={{animationDelay: '1.5s'}}>→</span>
+            <span className="arrow-fall" style={{animationDelay: '2s'}}>↓</span>
+            <span className="arrow-fall" style={{animationDelay: '2.5s'}}>↑</span>
+            <span className="arrow-fall" style={{animationDelay: '3s'}}>←</span>
+            <span className="arrow-fall" style={{animationDelay: '3.5s'}}>→</span>
+          </div>
+        </div>
+      )}
 
       {/* DDR Style Left Side Japanese Text - Hidden on mobile */}
       <div className="hidden md:flex fixed left-8 md:left-12 lg:left-16 top-0 h-full w-16 md:w-24 lg:w-32 flex-col items-center justify-center z-20 pointer-events-none">
@@ -319,19 +335,21 @@ export default function Home() {
         </div>
       </div>
 
-      {/* DDR Arrow Rain Right */}
-      <div className="fixed right-12 md:right-20 lg:right-28 top-0 h-full w-12 overflow-hidden z-10 pointer-events-none">
-        <div className="arrow-rain">
-          <span className="arrow-fall" style={{animationDelay: '0.3s'}}>↑</span>
-          <span className="arrow-fall" style={{animationDelay: '0.8s'}}>→</span>
-          <span className="arrow-fall" style={{animationDelay: '1.3s'}}>↓</span>
-          <span className="arrow-fall" style={{animationDelay: '1.8s'}}>←</span>
-          <span className="arrow-fall" style={{animationDelay: '2.3s'}}>↑</span>
-          <span className="arrow-fall" style={{animationDelay: '2.8s'}}>↓</span>
-          <span className="arrow-fall" style={{animationDelay: '3.3s'}}>→</span>
-          <span className="arrow-fall" style={{animationDelay: '3.8s'}}>←</span>
+      {/* DDR Arrow Rain Right - Only on desktop */}
+      {deviceInfo.isDesktop && (
+        <div className="fixed right-12 md:right-20 lg:right-28 top-0 h-full w-12 overflow-hidden z-10 pointer-events-none">
+          <div className="arrow-rain">
+            <span className="arrow-fall" style={{animationDelay: '0.3s'}}>↑</span>
+            <span className="arrow-fall" style={{animationDelay: '0.8s'}}>→</span>
+            <span className="arrow-fall" style={{animationDelay: '1.3s'}}>↓</span>
+            <span className="arrow-fall" style={{animationDelay: '1.8s'}}>←</span>
+            <span className="arrow-fall" style={{animationDelay: '2.3s'}}>↑</span>
+            <span className="arrow-fall" style={{animationDelay: '2.8s'}}>↓</span>
+            <span className="arrow-fall" style={{animationDelay: '3.3s'}}>→</span>
+            <span className="arrow-fall" style={{animationDelay: '3.8s'}}>←</span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* DDR Style Right Side Japanese Text - Hidden on mobile */}
       <div className="hidden md:flex fixed right-8 md:right-12 lg:right-16 top-0 h-full w-16 md:w-24 lg:w-32 flex-col items-center justify-center z-20 pointer-events-none">
@@ -411,12 +429,14 @@ export default function Home() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <ModelViewer />
+            {deviceInfo.isMobile ? <MobileModelViewer /> : <ModelViewer />}
             
-            {/* BPM Rhythm Meter - Moved under model */}
-            <div className="mt-6">
-              <RhythmMeter />
-            </div>
+            {/* BPM Rhythm Meter - Only on desktop */}
+            {deviceInfo.isDesktop && (
+              <div className="mt-6">
+                <RhythmMeter />
+              </div>
+            )}
           </motion.div>
 
           <motion.div 

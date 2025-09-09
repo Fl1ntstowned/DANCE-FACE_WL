@@ -32,6 +32,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
       setIsLoggedIn(true);
       fetchWallets(storedToken);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
