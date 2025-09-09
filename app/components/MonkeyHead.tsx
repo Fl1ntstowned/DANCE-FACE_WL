@@ -124,12 +124,12 @@ const MonkeyHead = forwardRef<THREE.Group>((props, ref) => {
         />
       </mesh>
 
-      {/* 3D Half-dome bloodshot eyes */}
+      {/* 3D Half-dome bloodshot eyes with X pupils */}
       {[-1, 1].map((side, index) => (
         <group key={`eye-${index}`}>
-          {/* Eye socket base for depth */}
+          {/* Eye socket base for depth - raised position */}
           <mesh
-            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.85]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.3, headConfig.size * 0.85]}
           >
             <sphereGeometry args={[headConfig.size * 0.12, 16, 16, 0, Math.PI]} />
             <meshBasicMaterial
@@ -138,9 +138,9 @@ const MonkeyHead = forwardRef<THREE.Group>((props, ref) => {
             />
           </mesh>
           
-          {/* Main eye - half dome protruding out */}
+          {/* Main eye - half dome protruding out - raised position */}
           <mesh
-            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.9]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.3, headConfig.size * 0.9]}
             rotation={[0, side * 0.15, 0]}  // Slight angle for realism
           >
             <sphereGeometry args={[
@@ -155,16 +155,18 @@ const MonkeyHead = forwardRef<THREE.Group>((props, ref) => {
             <meshPhysicalMaterial
               color={0xFFE0E0}  // Light pink-white base
               emissive={0xFF0000}  // Red glow
-              emissiveIntensity={0.05}
-              roughness={0.3}
-              clearcoat={0.8}  // Wet look
-              clearcoatRoughness={0.1}
+              emissiveIntensity={0.15}  // More glow for bloom
+              metalness={0.3}  // Add metallic sheen
+              roughness={0.2}
+              clearcoat={1.0}  // Maximum wet look
+              clearcoatRoughness={0.05}
+              envMapIntensity={0.5}
             />
           </mesh>
           
-          {/* Red veins overlay */}
+          {/* Red veins overlay - raised position */}
           <mesh
-            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.91]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.3, headConfig.size * 0.91]}
             rotation={[0, side * 0.15, 0]}
           >
             <sphereGeometry args={[
@@ -183,39 +185,68 @@ const MonkeyHead = forwardRef<THREE.Group>((props, ref) => {
             />
           </mesh>
           
-          {/* Iris - colored ring */}
+          {/* Metallic iris ring - raised position */}
           <mesh
-            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.95]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.3, headConfig.size * 0.95]}
           >
             <ringGeometry args={[
               headConfig.size * 0.04,  // inner radius
               headConfig.size * 0.07,  // outer radius
               32  // segments
             ]} />
-            <meshBasicMaterial
+            <meshPhysicalMaterial
               color={0x8B4513}  // Brown iris
+              metalness={0.6}  // Metallic iris
+              roughness={0.3}
+              emissive={0x8B4513}
+              emissiveIntensity={0.1}
               side={THREE.DoubleSide}
             />
           </mesh>
           
-          {/* Black pupil - clearly visible in center */}
+          {/* X-shaped pupil - first diagonal */}
           <mesh
-            position={[side * headConfig.size * 0.25, headConfig.size * 0.2, headConfig.size * 0.96]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.3, headConfig.size * 0.96]}
+            rotation={[0, 0, Math.PI / 4]}
           >
-            <circleGeometry args={[headConfig.size * 0.04, 32]} />
-            <meshBasicMaterial
+            <planeGeometry args={[headConfig.size * 0.08, headConfig.size * 0.015]} />
+            <meshPhysicalMaterial
               color={0x000000}  // Pure black
+              emissive={0xFF0000}  // Red glow
+              emissiveIntensity={0.2}  // Glow for bloom effect
+              metalness={0.8}  // High metalness
+              roughness={0.1}
               side={THREE.DoubleSide}
             />
           </mesh>
           
-          {/* Glossy highlight */}
+          {/* X-shaped pupil - second diagonal */}
           <mesh
-            position={[side * headConfig.size * 0.22, headConfig.size * 0.23, headConfig.size * 0.97]}
+            position={[side * headConfig.size * 0.25, headConfig.size * 0.3, headConfig.size * 0.96]}
+            rotation={[0, 0, -Math.PI / 4]}
+          >
+            <planeGeometry args={[headConfig.size * 0.08, headConfig.size * 0.015]} />
+            <meshPhysicalMaterial
+              color={0x000000}  // Pure black
+              emissive={0xFF0000}  // Red glow
+              emissiveIntensity={0.2}  // Glow for bloom effect
+              metalness={0.8}  // High metalness
+              roughness={0.1}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+          
+          {/* Glossy highlight - raised position with glow */}
+          <mesh
+            position={[side * headConfig.size * 0.22, headConfig.size * 0.33, headConfig.size * 0.97]}
           >
             <sphereGeometry args={[headConfig.size * 0.02, 8, 8]} />
-            <meshBasicMaterial
+            <meshPhysicalMaterial
               color={0xFFFFFF}
+              emissive={0xFFFFFF}
+              emissiveIntensity={0.5}  // Bright glow
+              metalness={0.9}
+              roughness={0}
               transparent={true}
               opacity={0.9}
             />
