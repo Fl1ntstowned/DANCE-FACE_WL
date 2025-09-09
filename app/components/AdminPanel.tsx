@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getApiUrl } from '../lib/api';
+import { useApiUrl } from '../hooks/useApiUrl';
 
 interface AdminPanelProps {
   onClose: () => void;
@@ -15,6 +15,7 @@ interface WalletEntry {
 }
 
 export default function AdminPanel({ onClose }: AdminPanelProps) {
+  const apiUrl = useApiUrl();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -39,7 +40,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${getApiUrl()}/api/admin/login`, {
+      const response = await fetch(`${apiUrl}/api/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -65,7 +66,7 @@ export default function AdminPanel({ onClose }: AdminPanelProps) {
   const fetchWallets = async (authToken: string) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${getApiUrl()}/api/admin/wallets`, {
+      const response = await fetch(`${apiUrl}/api/admin/wallets`, {
         headers: { 
           'Authorization': authToken 
         }

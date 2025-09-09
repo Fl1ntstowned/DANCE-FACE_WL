@@ -1,11 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 
-      (process.env.NODE_ENV === 'production' 
-        ? 'https://dance-face-wl-backend-production.up.railway.app'
-        : 'http://localhost:3001')
-  }
+  // Railway will set PORT env variable
+  // No need for hardcoded URLs here since we detect them client-side
 }
 
 module.exports = nextConfig

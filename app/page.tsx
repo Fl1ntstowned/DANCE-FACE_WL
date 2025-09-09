@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { getApiUrl } from './lib/api';
+import { useApiUrl } from './hooks/useApiUrl';
 import AdminPanel from './components/AdminPanel';
 import RhythmMeter from './components/RhythmMeter';
 import './ddr-effects.css';
@@ -14,6 +14,7 @@ const ModelViewer = dynamic(() => import('./components/ModelViewer'), {
 });
 
 export default function Home() {
+  const apiUrl = useApiUrl();
   const [walletAddress, setWalletAddress] = useState('');
   const [twitter, setTwitter] = useState('');
   const [communityName, setCommunityName] = useState('');
@@ -94,7 +95,7 @@ export default function Home() {
     setMessage('');
 
     try {
-      const response = await fetch(`${getApiUrl()}/api/whitelist`, {
+      const response = await fetch(`${apiUrl}/api/whitelist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
