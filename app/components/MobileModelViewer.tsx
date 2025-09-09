@@ -1,14 +1,17 @@
 'use client';
 
-import { useRef, Suspense, useEffect } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { useRef, Suspense, useEffect, useState } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, useGLTF, useAnimations } from '@react-three/drei';
 import * as THREE from 'three';
+import MonkeyHead from './MonkeyHead';
 
 function SimplifiedModel() {
   const { scene, animations } = useGLTF('/Animation_Boom_Dance_withSkin (1).glb');
   const modelRef = useRef<THREE.Group>(null);
+  const monkeyRef = useRef<THREE.Group>(null);
   const { actions } = useAnimations(animations, modelRef);
+  const [headBone, setHeadBone] = useState<THREE.Object3D | null>(null);
 
   useEffect(() => {
     // Play animation at reduced speed for mobile
@@ -20,9 +23,13 @@ function SimplifiedModel() {
       }
     }
 
-    // Simplify materials for mobile
+    // Find the head bone and simplify materials for mobile
     if (scene) {
       scene.traverse((child) => {
+        if (child.type === 'Bone' && (child.name.toLowerCase().includes('head') || child.name.toLowerCase().includes('neck'))) {
+          setHeadBone(child);
+        }
+        
         if ((child as THREE.Mesh).isMesh) {
           const mesh = child as THREE.Mesh;
           if (mesh.material) {
@@ -49,10 +56,34 @@ function SimplifiedModel() {
     }
   }, [actions, scene]);
 
+  useFrame((state) => {
+    if (monkeyRef.current && headBone) {
+      // Get world position of the head bone
+      const worldPos = new THREE.Vector3();
+      headBone.getWorldPosition(worldPos);
+      
+      // Position monkey head above the head bone
+      monkeyRef.current.position.copy(worldPos);
+      monkeyRef.current.position.x += 0.05; // Slightly right to center better
+      monkeyRef.current.position.y += 0.4; // Offset above head
+      monkeyRef.current.position.z -= 0.25; // Move back more to avoid hand collision
+      monkeyRef.current.position.y += Math.sin(state.clock.elapsedTime * 2) * 0.05;
+    } else if (monkeyRef.current) {
+      // Fallback if no head bone found
+      monkeyRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.1;
+      monkeyRef.current.position.z = -0.15; // Also move back in fallback
+    }
+  });
+
   return (
-    <group ref={modelRef} position={[0, -1.8, 0]} scale={1.2}>
-      <primitive object={scene} />
-    </group>
+    <>
+      <group ref={modelRef} position={[0, -1.8, 0]} scale={1.2}>
+        <primitive object={scene} />
+      </group>
+      
+      {/* Monkey head to follow head bone */}
+      <MonkeyHead ref={monkeyRef} />
+    </>
   );
 }
 

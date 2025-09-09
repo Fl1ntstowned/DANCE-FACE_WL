@@ -2,15 +2,16 @@
 
 import { useRef, Suspense, useEffect, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, useGLTF, useAnimations, Text3D, Environment } from '@react-three/drei';
+import { OrbitControls, useGLTF, useAnimations, Environment } from '@react-three/drei';
 import { EffectComposer, Bloom, Scanline, ChromaticAberration, Glitch } from '@react-three/postprocessing';
 import { GlitchMode } from 'postprocessing';
 import * as THREE from 'three';
+import MonkeyHead from './MonkeyHead';
 
 function Model() {
   const { scene, animations } = useGLTF('/Animation_Boom_Dance_withSkin (1).glb');
   const modelRef = useRef<THREE.Group>(null);
-  const questionRef = useRef<THREE.Mesh>(null);
+  const monkeyRef = useRef<THREE.Group>(null);
   const scanlineRef = useRef<THREE.Mesh>(null);
   const { actions } = useAnimations(animations, modelRef);
   const [headBone, setHeadBone] = useState<THREE.Object3D | null>(null);
@@ -44,13 +45,13 @@ function Model() {
                   normalMap: (mat as THREE.MeshStandardMaterial).normalMap,
                   color: (mat as THREE.MeshStandardMaterial).color,
                   emissive: (mat as THREE.MeshStandardMaterial).emissive || new THREE.Color(0x000000),
-                  emissiveIntensity: 0.1, // Slight self-illumination for crispness
-                  roughness: 0.05, // Tiny bit of roughness for realism
-                  metalness: 0.7, // More metallic
+                  emissiveIntensity: 0.05, // Subtle self-illumination
+                  roughness: 0.15, // Slightly more roughness for realism
+                  metalness: 0.2, // Much less metallic
                   clearcoat: 1.0, // Maximum clear coat
-                  clearcoatRoughness: 0, // Smooth clear coat
-                  reflectivity: 0.8, // Strong but not overwhelming reflectivity
-                  envMapIntensity: 1.5, // Balanced environment reflections
+                  clearcoatRoughness: 0.05, // Very smooth clear coat
+                  reflectivity: 0.6, // Moderate reflectivity
+                  envMapIntensity: 1.2, // Balanced environment reflections
                   ior: 1.45, // Index of refraction
                   sheen: 0.5, // Moderate sheen
                   sheenRoughness: 0.1,
@@ -81,21 +82,21 @@ function Model() {
       modelRef.current.scale.setScalar(1.2 * pulse);
     }
     
-    if (questionRef.current && headBone) {
+    if (monkeyRef.current && headBone) {
       // Get world position of the head bone
       const worldPos = new THREE.Vector3();
       headBone.getWorldPosition(worldPos);
       
-      // Position question mark above the head bone
-      questionRef.current.position.copy(worldPos);
-      questionRef.current.position.x -= 0.2; // Center it better (move left)
-      questionRef.current.position.y += 0.3; // Offset above head
-      questionRef.current.position.z -= 0.15; // Move back to avoid hand collision
-      questionRef.current.position.y += Math.sin(state.clock.elapsedTime * 2) * 0.05;
-    } else if (questionRef.current) {
+      // Position monkey head above the head bone
+      monkeyRef.current.position.copy(worldPos);
+      monkeyRef.current.position.x += 0.05; // Slightly right to center better
+      monkeyRef.current.position.y += 0.4; // Offset above head
+      monkeyRef.current.position.z -= 0.25; // Move back more to avoid hand collision
+      monkeyRef.current.position.y += Math.sin(state.clock.elapsedTime * 2) * 0.05;
+    } else if (monkeyRef.current) {
       // Fallback if no head bone found
-      questionRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.1;
-      questionRef.current.position.z = -0.15; // Also move back in fallback
+      monkeyRef.current.position.y = Math.sin(state.clock.elapsedTime * 2) * 0.1;
+      monkeyRef.current.position.z = -0.15; // Also move back in fallback
     }
 
     if (scanlineRef.current) {
@@ -110,36 +111,8 @@ function Model() {
         <primitive object={scene} />
       </group>
       
-      {/* Question mark is now separate to follow head bone */}
-      <Text3D
-        ref={questionRef}
-        font="/fonts/helvetiker_regular.typeface.json"
-        size={0.4}
-        height={0.2}
-        curveSegments={12}
-        bevelEnabled
-        bevelThickness={0.02}
-        bevelSize={0.02}
-        bevelOffset={0}
-        bevelSegments={5}
-      >
-        ?
-        <meshPhysicalMaterial 
-          color="#00ffff"
-          emissive="#00ffff"
-          emissiveIntensity={0.3}
-          metalness={0.7}
-          roughness={0.05}
-          clearcoat={1.0}
-          clearcoatRoughness={0}
-          reflectivity={0.8}
-          envMapIntensity={1.5}
-          ior={1.45}
-          sheen={0.5}
-          sheenRoughness={0.1}
-          sheenColor={new THREE.Color(0x00ffff)}
-        />
-      </Text3D>
+      {/* Monkey head is now separate to follow head bone */}
+      <MonkeyHead ref={monkeyRef} />
 
       <mesh ref={scanlineRef} position={[0, 0, 0]}>
         <planeGeometry args={[10, 0.02]} />
