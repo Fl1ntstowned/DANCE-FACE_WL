@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { useApiUrl } from './hooks/useApiUrl';
 import { useDeviceDetection } from './hooks/useDeviceDetection';
 import AdminPanel from './components/AdminPanel';
 import RhythmMeter from './components/RhythmMeter';
@@ -22,16 +21,9 @@ const MobileModelViewer = dynamic(() => import('./components/MobileModelViewer')
 });
 
 export default function Home() {
-  const apiUrl = useApiUrl();
   const deviceInfo = useDeviceDetection();
-  const [walletAddress, setWalletAddress] = useState('');
-  const [twitter, setTwitter] = useState('');
-  const [communityName, setCommunityName] = useState('');
-  const [collectionTwitter, setCollectionTwitter] = useState('');
-  const [founderWallet, setFounderWallet] = useState('');
   const [requestType, setRequestType] = useState<'individual' | 'community'>('individual');
   const [showAdmin, setShowAdmin] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
   const [position, setPosition] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState(false);
@@ -98,49 +90,6 @@ export default function Home() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setMessage('');
-
-    try {
-      const response = await fetch(`${apiUrl}/api/whitelist`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          address: walletAddress, 
-          twitter,
-          communityName: requestType === 'community' ? communityName : '',
-          collectionTwitter: requestType === 'community' ? collectionTwitter : '',
-          founderWallet: requestType === 'community' ? founderWallet : '',
-          requestType 
-        })
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage(data.message);
-        setPosition(data.position);
-        setWalletAddress('');
-        setTwitter('');
-        setCommunityName('');
-        setCollectionTwitter('');
-        setFounderWallet('');
-        
-        setTimeout(() => {
-          setMessage('');
-          setPosition(null);
-        }, 5000);
-      } else {
-        setMessage(data.error);
-      }
-    } catch {
-      setMessage('Oops! Something funky happened. Try again! 🎭');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   if (showAdmin) {
     return <AdminPanel onClose={() => setShowAdmin(false)} />;
@@ -454,7 +403,7 @@ export default function Home() {
               </p>
             </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             <div className="flex gap-2 p-1 bg-black/50 rounded-xl">
               <button
                 type="button"
@@ -488,70 +437,36 @@ export default function Home() {
                   exit={{ opacity: 0, height: 0 }}
                   className="space-y-4"
                 >
-                  <input
-                    type="text"
-                    placeholder="Collection Name"
-                    value={communityName}
-                    onChange={(e) => setCommunityName(e.target.value)}
-                    required={requestType === 'community'}
-                    className="w-full px-4 md:px-5 py-3 md:py-4 rounded-xl bg-black/50 border border-cyan-500/30 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all text-sm md:text-base"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Collection Twitter / X Handle"
-                    value={collectionTwitter}
-                    onChange={(e) => setCollectionTwitter(e.target.value)}
-                    required={requestType === 'community'}
-                    className="w-full px-4 md:px-5 py-3 md:py-4 rounded-xl bg-black/50 border border-cyan-500/30 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all text-sm md:text-base"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Founder's BTC / Ordinals Wallet Address"
-                    value={founderWallet}
-                    onChange={(e) => setFounderWallet(e.target.value)}
-                    required={requestType === 'community'}
-                    className="w-full px-4 md:px-5 py-3 md:py-4 rounded-xl bg-black/50 border border-cyan-500/30 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all font-mono text-sm md:text-base"
-                  />
+                  <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-6 text-center">
+                    <div className="text-yellow-400 font-bold text-lg mb-2">
+                      COMMUNITY COLLABORATIONS FULL
+                    </div>
+                    <p className="text-yellow-300/80 text-sm">
+                      We&apos;ve reached capacity for now!
+                    </p>
+                    <p className="text-yellow-300/80 text-sm mt-2">
+                      Stay tuned as we do have some more spots available in challenges.
+                    </p>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
             <div className="space-y-4">
               {requestType === 'individual' && (
-                <>
-                  <input
-                    type="text"
-                    placeholder="BTC / Ordinals Wallet Address"
-                    value={walletAddress}
-                    onChange={(e) => setWalletAddress(e.target.value)}
-                    required
-                    className="w-full px-4 md:px-5 py-3 md:py-4 rounded-xl bg-black/50 border border-cyan-500/30 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all font-mono text-sm md:text-base"
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="Twitter / X Handle"
-                    value={twitter}
-                    onChange={(e) => setTwitter(e.target.value)}
-                    required
-                    className="w-full px-4 md:px-5 py-3 md:py-4 rounded-xl bg-black/50 border border-cyan-500/30 text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 focus:shadow-[0_0_20px_rgba(0,255,255,0.3)] transition-all text-sm md:text-base"
-                  />
-                </>
+                <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-xl p-6 text-center">
+                  <div className="text-yellow-400 font-bold text-lg mb-2">
+                    INDIVIDUAL COLLABORATIONS FULL
+                  </div>
+                  <p className="text-yellow-300/80 text-sm">
+                    We&apos;ve reached capacity for now!
+                  </p>
+                  <p className="text-yellow-300/80 text-sm mt-2">
+                    Stay tuned as we do have some more spots available in challenges.
+                  </p>
+                </div>
               )}
             </div>
-
-            <motion.button
-              type="submit"
-              disabled={isSubmitting}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="w-full py-4 md:py-5 rounded-xl bg-gradient-to-r from-cyan-500 via-purple-500 to-pink-500 text-white font-bold text-base md:text-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_30px_rgba(0,255,255,0.5)] hover:shadow-[0_0_50px_rgba(0,255,255,0.7)] relative overflow-hidden group breathing-button explode-hover"
-            >
-              <span className="relative z-10">
-                {isSubmitting ? 'PROCESSING...' : 'SECURE WHITELIST SPOT'}
-              </span>
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </motion.button>
-          </form>
+          </div>
 
           <AnimatePresence>
             {message && (
