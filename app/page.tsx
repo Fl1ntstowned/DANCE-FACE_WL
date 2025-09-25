@@ -24,8 +24,6 @@ export default function Home() {
   const deviceInfo = useDeviceDetection();
   const [requestType, setRequestType] = useState<'individual' | 'community'>('individual');
   const [showAdmin, setShowAdmin] = useState(false);
-  const [message, setMessage] = useState('');
-  const [position, setPosition] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -372,6 +370,40 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* Dance Face Revolution Game Button */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex justify-center mb-8"
+        >
+          <a
+            href="/dance-face-revolution"
+            className="relative group"
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 rounded-full blur-xl group-hover:blur-2xl transition-all duration-300 opacity-70 group-hover:opacity-100 animate-pulse"></div>
+            <button className="relative px-8 py-4 bg-black border-2 border-transparent rounded-full font-bold text-xl uppercase tracking-wider transition-all duration-300 group-hover:scale-110 group-hover:rotate-1"
+                    style={{
+                      background: 'linear-gradient(145deg, rgba(0,0,0,0.9), rgba(20,0,40,0.9))',
+                      borderImage: 'linear-gradient(45deg, #ff00ff, #00ffff, #ffff00, #ff00ff) 1',
+                      borderImageSlice: 1,
+                    }}>
+              <span className="flex items-center gap-3">
+                <span className="text-2xl animate-bounce">🎮</span>
+                <span className="bg-gradient-to-r from-pink-500 via-yellow-500 to-cyan-500 bg-clip-text text-transparent">
+                  PLAY DANCE FACE REVOLUTION 69
+                </span>
+                <span className="text-2xl animate-bounce animation-delay-200">🎮</span>
+              </span>
+              <div className="absolute -top-2 -right-2 text-yellow-400 text-xl animate-spin">★</div>
+              <div className="absolute -bottom-2 -left-2 text-pink-500 text-xl animate-spin animation-delay-500">♫</div>
+              <div className="text-xs text-cyan-400 mt-1 text-center">
+                EARN WHITELIST SPOTS • HIGH SCORES WIN
+              </div>
+            </button>
+          </a>
+        </motion.div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start max-w-7xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
@@ -468,27 +500,6 @@ export default function Home() {
             </div>
           </div>
 
-          <AnimatePresence>
-            {message && (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className={`mt-6 p-4 md:p-6 rounded-xl text-center border ${
-                  message.includes('Welcome') 
-                    ? 'bg-green-500/10 border-green-500/50 text-green-400' 
-                    : 'bg-red-500/10 border-red-500/50 text-red-400'
-                }`}
-              >
-                <p className="font-bold text-base md:text-lg">{message}</p>
-                {position && (
-                  <p className="mt-2 text-sm md:text-base">
-                    Position #{position} on the whitelist
-                  </p>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
             <div className="mt-6 lg:mt-8 p-4 bg-purple-900/20 rounded-xl rainbow-border">
               <h3 className="text-purple-400 font-bold mb-2 text-sm md:text-base chrome-text">PROJECT HIGHLIGHTS</h3>
               <ul className="text-gray-400 text-xs md:text-sm space-y-1">
