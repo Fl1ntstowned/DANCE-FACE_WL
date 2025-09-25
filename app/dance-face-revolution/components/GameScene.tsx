@@ -140,59 +140,6 @@ function DanceModel({ comboHeat = 0, gaugeLevel = 0 }: { comboHeat?: number; gau
         <MonkeyHead scale={[0.8, 0.8, 0.8]} />
       </group>
 
-      {/* Enhanced outline and glow effects with light beams */}
-      {modelReady && (
-        <>
-          {/* Dynamic rim light effect */}
-          {gaugeLevel > 30 && (
-            <group scale={[1.02, 1.02, 1.02]}>
-              <primitive object={scene.clone()} />
-              <meshBasicMaterial
-                attach="material"
-                color={gaugeLevel > 70 ? '#ff00ff' : gaugeLevel > 50 ? '#00ffff' : '#0088ff'}
-                transparent
-                opacity={0.3 * (gaugeLevel / 100)}
-                side={THREE.BackSide}
-                depthWrite={false}
-              />
-            </group>
-          )}
-
-          {/* Inner glow light */}
-          {gaugeLevel > 40 && (
-            <pointLight
-              position={[0, 0, 0]}
-              intensity={1.0 * (gaugeLevel / 100)}
-              color={gaugeLevel > 70 ? '#ff00ff' : '#00ffff'}
-              distance={10}
-            />
-          )}
-
-          {/* Light beams emanating from model at high gauge */}
-          {gaugeLevel > 60 && (
-            <group>
-              {Array.from({ length: Math.min(6, Math.floor((gaugeLevel - 60) / 8)) }, (_, i) => {
-                const angle = (i / 6) * Math.PI * 2;
-                return (
-                  <spotLight
-                    key={`beam-${i}`}
-                    position={[0, 0, 0]}
-                    angle={0.15}
-                    penumbra={0.8}
-                    intensity={0.5 * (gaugeLevel / 100)}
-                    color={gaugeLevel > 80 ? '#ff00ff' : '#00ffff'}
-                    target-position={[
-                      Math.sin(angle) * 10,
-                      Math.cos(angle) * 10,
-                      -5
-                    ]}
-                  />
-                );
-              })}
-            </group>
-          )}
-        </>
-      )}
     </group>
   );
 }
@@ -234,29 +181,17 @@ function GaugeDissipator({ isPlaying, gaugeLevel, updateGauge }: { isPlaying: bo
   return null;
 }
 
-// Global flag to track active instance - Reset based on environment
+// Global flag to track active instance - DO NOT RESET IN PRODUCTION
 if (typeof window !== 'undefined') {
   const win = window as any;
-  const isDevelopment = process.env.NODE_ENV === 'development';
 
-  // In development, ALWAYS clear state on module load to prevent HMR issues
-  // In production, only clear on first load
-  const shouldClearState = isDevelopment || !win.__gameSceneInitialized;
-
-  if (shouldClearState) {
+  // Only initialize if completely new
+  if (!win.__gameSceneInitialized) {
     win.__gameSceneInitialized = true;
     win.__gameContentActive = null;
     win.__gameContentInstances = new Set();
-
-    // Clear any lingering timers
-    if (win.__allTimers) {
-      win.__allTimers.forEach((t: any) => clearTimeout(t));
-    }
     win.__allTimers = [];
-
-    console.log(`[GameScene Module] ${isDevelopment ? 'Dev mode' : 'Initial page load'} - cleared all global state`);
-  } else {
-    console.log('[GameScene Module] Module re-load detected in production, preserving state');
+    console.log('[GameScene Module] Initial setup complete');
   }
 }
 
@@ -279,46 +214,11 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
   const startTimeRef = useRef(Date.now()); // Track actual start time
   const [shouldGenerateArrows, setShouldGenerateArrows] = useState(true); // Control arrow generation
 
-  // Ensure only one instance is active
+  // Simple activation without complex instance tracking
   useEffect(() => {
-    const currentInstanceId = instanceId.current; // Capture for cleanup
-    const win = window as any;
-
-    // Register this instance
-    win.__gameContentInstances = win.__gameContentInstances || new Set();
-    win.__gameContentInstances.add(currentInstanceId);
-
-    // Activate immediately if no other instance is active
-    if (!win.__gameContentActive) {
-      win.__gameContentActive = currentInstanceId;
-      setIsActive(true);
-      console.log(`[GameContent-${currentInstanceId}] Activated immediately (${win.__gameContentInstances.size} total instances)`);
-    } else if (win.__gameContentActive === currentInstanceId) {
-      // This instance is already active
-      setIsActive(true);
-      console.log(`[GameContent-${currentInstanceId}] Already active`);
-    } else {
-      // Another instance is active, check if it's still valid
-      if (!win.__gameContentInstances.has(win.__gameContentActive)) {
-        // The active instance no longer exists, take over
-        win.__gameContentActive = currentInstanceId;
-        setIsActive(true);
-        console.log(`[GameContent-${currentInstanceId}] Took over from defunct instance`);
-      } else {
-        console.warn(`[GameContent-${currentInstanceId}] Another instance is active: ${win.__gameContentActive}`);
-        setIsActive(false);
-      }
-    }
-
+    setIsActive(true);
     return () => {
-      // Only clear active flag if this instance was active
-      if (win.__gameContentActive === currentInstanceId) {
-        win.__gameContentActive = null;
-        console.log(`[GameContent-${currentInstanceId}] Deactivated`);
-      }
-
-      // Remove from instances set
-      win.__gameContentInstances?.delete(currentInstanceId);
+      setIsActive(false);
     };
   }, []);
 
@@ -334,9 +234,7 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
 
   // Debug logging and sync gauge
   useEffect(() => {
-    if (isActive) {
-      console.log('[GameContent] Mounted with difficulty:', difficulty, 'isPlaying:', isPlaying, 'currentGauge:', currentGauge, 'songDuration:', songDuration);
-    }
+    console.log('[GameContent] Mounted with difficulty:', difficulty, 'isPlaying:', isPlaying, 'currentGauge:', currentGauge, 'songDuration:', songDuration);
     if (currentGauge !== undefined && currentGauge !== localGauge) {
       setLocalGauge(currentGauge);
     }
@@ -345,7 +243,6 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
 
   // Reset game state when playing status changes and scene is ready
   useEffect(() => {
-    if (!isActive) return;
     if (isPlaying && sceneReady) {
       setShouldGenerateArrows(true);
       gameTimeRef.current = 0;
@@ -355,7 +252,7 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
       console.log('[GameContent] Game started but scene not ready, waiting...');
       setShouldGenerateArrows(false);
     }
-  }, [isPlaying, sceneReady, isActive]);
+  }, [isPlaying, sceneReady]);
 
   // Generate arrow pattern based on difficulty
   const generateArrowPattern = useCallback(() => {
@@ -370,13 +267,13 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
     return pattern[Math.floor(Math.random() * pattern.length)] as ArrowDirection;
   }, [difficulty]);
 
-  // Generate new arrows on beat
+  // Generate new arrows on beat - Simplified for stability
   useFrame((state, delta) => {
-    try {
-      if (!isActive || !isPlaying || !sceneReady) {
-        return;
-      }
+    if (!isPlaying || !sceneReady) {
+      return;
+    }
 
+    try {
       gameTimeRef.current += delta * 1000;
 
       // Check if we should stop generating arrows (song has ended)
@@ -401,8 +298,9 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
       if (shouldGenerateArrows && gameTimeRef.current - lastBeatRef.current >= beatInterval) {
         lastBeatRef.current = gameTimeRef.current;
 
+        const arrowId = arrowIdRef.current++;
         const newArrow: Arrow = {
-          id: `arrow-${arrowIdRef.current++}`,
+          id: `arrow-${arrowId}`,
           direction: generateArrowPattern(),
           position: 15, // Start closer
           targetTime: gameTimeRef.current + (15 / ARROW_SPEED[difficulty]) * 1000,
@@ -423,9 +321,7 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
         setTotalArrowsGenerated(prev => {
           const newTotal = prev + 1;
           totalArrowsRef.current = newTotal; // Update ref for immediate access
-          if (isActive && newTotal <= 20) { // Only log first 20 arrows if active instance
-            console.log(`[Arrow Generated] #${newTotal} at ${(gameTimeRef.current/1000).toFixed(1)}s (song duration: ${songDuration}s)`);
-          }
+          console.log(`[Arrow Generated] Arrow #${arrowId} (Total: ${newTotal}) - ${newArrow.direction} at ${(gameTimeRef.current/1000).toFixed(1)}s`);
           return newTotal;
         });
       }
@@ -440,26 +336,31 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
 
             // Check if arrow missed the target zone (well past the hit zone)
             // Hit zone is at position 0 with tolerance ±2.5, so auto-miss at -3.5
-            if (newPosition < -3.5) {
-              if (!arrow.hit && isActive) {
-                console.log(`[Auto-Miss] Arrow passed without hit - Direction: ${arrow.direction}`);
-                onUpdateScore({
-                  miss: 1,
-                  combo: 0
-                });
-                showJudgment('miss');
-                // Decrease gauge on auto-miss
-                const newGauge = Math.max(0, localGauge - 5);
-                updateGauge(newGauge);
-              }
-              return { ...arrow, position: newPosition, hit: true };
+            // IMPORTANT: Only trigger miss ONCE by marking arrow as hit
+            if (newPosition < -3.5 && !arrow.hit) {
+              console.log(`[Auto-Miss] Arrow #${arrow.id} passed without hit - Direction: ${arrow.direction}`);
+              // Mark as hit FIRST to prevent duplicate miss counts
+              const missedArrow = { ...arrow, position: newPosition, hit: true, judgment: 'miss' as JudgmentType };
+
+              // Update score ONCE
+              onUpdateScore({
+                miss: 1,
+                combo: 0
+              });
+              showJudgment('miss');
+
+              // Decrease gauge on auto-miss
+              const newGauge = Math.max(0, localGauge - 5);
+              updateGauge(newGauge);
+
+              return missedArrow;
             }
 
             return { ...arrow, position: newPosition };
           });
 
           // Remove arrows well after they pass the target zone
-          return updated.filter(arrow => arrow.position > -4);
+          return updated.filter(arrow => arrow.position > -5);
         } catch (error) {
           console.error('[GameContent] Error updating arrows:', error);
           return prev;
@@ -485,12 +386,13 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
   };
 
   const handleArrowHit = useCallback((direction: ArrowDirection) => {
-    // Don't process hits if not active instance
-    if (!isActive) return;
+    // Process all hits when playing
+    if (!isPlaying) return;
 
     setArrows(prev => {
       let hitFound = false;
       const updated = prev.map(arrow => {
+        // Skip if arrow already hit or we already found a hit this frame
         if (arrow.hit || hitFound) return arrow;
 
         // Check if arrow is in the hit zone
@@ -498,7 +400,7 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
 
         // If arrow is in hit zone and matches direction
         if (distance <= 2.5 && arrow.direction === direction) {
-          hitFound = true;
+          hitFound = true; // Prevent hitting multiple arrows at once
           let judgment: JudgmentType;
           let points = 0;
 
@@ -573,27 +475,47 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
       // If no arrow was hit, check if there was any arrow in the hit zone
       // If yes, it means player pressed wrong key = miss
       if (!hitFound) {
-        const hasArrowInZone = prev.some(arrow =>
+        const arrowsInZone = prev.filter(arrow =>
           !arrow.hit && Math.abs(arrow.position) <= 2.5
         );
 
-        if (hasArrowInZone) {
+        if (arrowsInZone.length > 0) {
+          console.log(`[Wrong Key] Player pressed ${direction} but arrows in zone are:`,
+                      arrowsInZone.map(a => a.direction).join(', '));
+
           // Player pressed wrong key while arrow was in zone = miss
+          // Mark the closest arrow as missed
+          const closestArrow = arrowsInZone.reduce((closest, arrow) =>
+            Math.abs(arrow.position) < Math.abs(closest.position) ? arrow : closest
+          );
+
+          // Find and mark the closest arrow as hit/missed
+          const finalUpdated = updated.map(arrow => {
+            if (arrow.id === closestArrow.id && !arrow.hit) {
+              console.log(`[Wrong Key Miss] Marking arrow #${arrow.id} (${arrow.direction}) as missed`);
+              return { ...arrow, hit: true, judgment: 'miss' as JudgmentType };
+            }
+            return arrow;
+          });
+
           onUpdateScore({
             miss: 1,
             combo: 0
           });
           showJudgment('miss');
+          setComboHeat(0);
 
           // Small gauge penalty for wrong key
           const newGauge = Math.max(0, localGauge - 3);
           updateGauge(newGauge);
+
+          return finalUpdated;
         }
       }
 
       return updated;
     });
-  }, [onUpdateScore, localGauge, updateGauge, difficulty, isActive]);
+  }, [onUpdateScore, localGauge, updateGauge, difficulty, isPlaying]);
 
   // Keyboard input handling with repeat prevention
   useEffect(() => {
@@ -631,12 +553,17 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
     if (isPlaying && songDuration) {
       // Use actual song duration with small buffer
       const timer = setTimeout(() => {
-        console.log(`[GameContent] Song ended after ${songDuration} seconds. Total arrows generated: ${totalArrowsRef.current}`);
+        // Log final stats
+        const remainingArrows = arrows.filter(a => !a.hit).length;
+        console.log(`[GameContent] FINAL STATS:`);
+        console.log(`  - Total arrows generated: ${totalArrowsRef.current}`);
+        console.log(`  - Remaining unhit arrows: ${remainingArrows}`);
+        console.log(`  - Song duration: ${songDuration} seconds`);
         onEndGame();
       }, (songDuration + 2) * 1000); // Add 2 second buffer for audio delay
       return () => clearTimeout(timer);
     }
-  }, [isPlaying, onEndGame, songDuration, totalArrowsGenerated, onUpdateScore]);
+  }, [isPlaying, onEndGame, songDuration, arrows]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -648,34 +575,12 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
 
   return (
     <>
-      {/* Optimized stage floor */}
+      {/* Simple dance floor */}
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -3, 0]}>
         <planeGeometry args={[30, 40]} />
-        {renderStage >= 2 ? (
-          <meshStandardMaterial
-            color="#1a1a2e"
-            metalness={0.6}
-            roughness={0.4}
-            emissive="#0055cc"
-            emissiveIntensity={0.15}
-          />
-        ) : (
-          <meshBasicMaterial color="#1a1a2e" />
-        )}
+        <meshBasicMaterial color="#0a0a1e" />
       </mesh>
 
-      {/* Grid effect - only at higher quality */}
-      {renderStage >= 2 && (
-        <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -2.98, 0]}>
-          <planeGeometry args={[30, 30, 15, 15]} />
-          <meshBasicMaterial
-            color="#0066ff"
-            wireframe
-            transparent
-            opacity={0.15}
-          />
-        </mesh>
-      )}
 
       {/* Target zones with hit lighting */}
       {Object.entries(LANE_POSITIONS).map(([direction, x]) => {
@@ -688,15 +593,13 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
 
         return (
           <group key={direction} position={[x, -2.5, 0]}>
-            {/* Target zone ring - simple glow when hit */}
+            {/* Target zone ring - simple */}
             <mesh rotation={[-Math.PI / 2, 0, 0]}>
-              <ringGeometry args={[1.0, 1.5, 24]} />
-              <meshStandardMaterial
+              <ringGeometry args={[1.0, 1.5, 16]} />
+              <meshBasicMaterial
                 color={color}
-                emissive={color}
-                emissiveIntensity={wasHit ? 0.8 : 0.3}
                 transparent
-                opacity={0.7}
+                opacity={wasHit ? 0.9 : 0.6}
               />
             </mesh>
 
@@ -706,11 +609,11 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
                 <group>
                   <mesh position={[0.2, 0, 0]}>
                     <boxGeometry args={[0.4, 0.1, 0.02]} />
-                    <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
+                    <meshBasicMaterial color="#ffffff" opacity={0.8} transparent />
                   </mesh>
                   <mesh position={[-0.2, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
                     <coneGeometry args={[0.2, 0.3, 3]} />
-                    <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
+                    <meshBasicMaterial color="#ffffff" opacity={0.8} transparent />
                   </mesh>
                 </group>
               )}
@@ -718,11 +621,11 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
                 <group>
                   <mesh position={[-0.2, 0, 0]}>
                     <boxGeometry args={[0.4, 0.1, 0.02]} />
-                    <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
+                    <meshBasicMaterial color="#ffffff" opacity={0.8} transparent />
                   </mesh>
                   <mesh position={[0.2, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
                     <coneGeometry args={[0.2, 0.3, 3]} />
-                    <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
+                    <meshBasicMaterial color="#ffffff" opacity={0.8} transparent />
                   </mesh>
                 </group>
               )}
@@ -730,11 +633,11 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
                 <group>
                   <mesh position={[0, -0.2, 0]}>
                     <boxGeometry args={[0.1, 0.4, 0.02]} />
-                    <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
+                    <meshBasicMaterial color="#ffffff" opacity={0.8} transparent />
                   </mesh>
                   <mesh position={[0, 0.2, 0]} rotation={[0, 0, 0]}>
                     <coneGeometry args={[0.2, 0.3, 3]} />
-                    <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
+                    <meshBasicMaterial color="#ffffff" opacity={0.8} transparent />
                   </mesh>
                 </group>
               )}
@@ -742,11 +645,11 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
                 <group>
                   <mesh position={[0, 0.2, 0]}>
                     <boxGeometry args={[0.1, 0.4, 0.02]} />
-                    <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
+                    <meshBasicMaterial color="#ffffff" opacity={0.8} transparent />
                   </mesh>
                   <mesh position={[0, -0.2, 0]} rotation={[0, 0, Math.PI]}>
                     <coneGeometry args={[0.2, 0.3, 3]} />
-                    <meshStandardMaterial color="#ffffff" emissive="#ffffff" emissiveIntensity={0.4} />
+                    <meshBasicMaterial color="#ffffff" opacity={0.8} transparent />
                   </mesh>
                 </group>
               )}
@@ -765,7 +668,7 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
         );
       })}
 
-      {/* Render arrows */}
+      {/* Render arrows - simplified without effects */}
       {arrows.map(arrow => {
         try {
           const laneX = LANE_POSITIONS[arrow.direction];
@@ -778,6 +681,7 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
               key={arrow.id}
               arrow={arrow}
               laneX={laneX}
+              gaugeLevel={gaugeLevel}
             />
           );
         } catch (error) {
@@ -793,53 +697,6 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
         </Suspense>
       )}
 
-      {/* Enhanced visual effects - only when ready */}
-      {renderStage >= 2 && gaugeLevel > 50 && (
-        <>
-          {/* Improved particle system */}
-          <group position={[0, 0, -5]}>
-            {Array.from({ length: Math.min(12, Math.floor(comboHeat * 12)) }, (_, i) => {
-              const time = Date.now() * 0.001;
-              const angle = (i / 12) * Math.PI * 2;
-              const radius = 3 + Math.sin(time + i) * 0.5;
-              return (
-                <mesh key={`particle-${i}`} position={[
-                  Math.sin(angle) * radius,
-                  Math.cos(time * 2 + i) * 2,
-                  Math.cos(angle) * radius * 0.5
-                ]}>
-                  <sphereGeometry args={[0.2, 8, 8]} />
-                  <meshStandardMaterial
-                    color={gaugeLevel > 80 ? '#ff00ff' : '#00ffff'}
-                    emissive={gaugeLevel > 80 ? '#ff00ff' : '#00ffff'}
-                    emissiveIntensity={0.5}
-                    transparent
-                    opacity={0.8}
-                  />
-                </mesh>
-              );
-            })}
-          </group>
-
-          {/* Dynamic lighting system */}
-          <pointLight
-            position={[0, 0, -5]}
-            intensity={1.5 + (gaugeLevel / 100)}
-            color={gaugeLevel > 80 ? '#ff00ff' : '#00ffff'}
-            distance={10}
-          />
-          {renderStage >= 3 && (
-            <spotLight
-              position={[0, 10, 0]}
-              angle={0.5}
-              penumbra={0.5}
-              intensity={0.5}
-              color="#ffffff"
-              target-position={[0, 0, -5]}
-            />
-          )}
-        </>
-      )}
 
 
       {/* Judgment effect */}
@@ -872,30 +729,15 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
 // Preload the model
 useGLTF.preload('/Animation_Boom_Dance_withSkin (1).glb');
 
-// Clear countdown state based on environment
+// Initialize countdown state only once
 if (typeof window !== 'undefined') {
   const win = window as any;
-  const isDevelopment = process.env.NODE_ENV === 'development';
 
-  // In development, ALWAYS clear countdown state to prevent HMR issues
-  const shouldClearCountdown = isDevelopment || !win.__gameSceneInitialized2;
-
-  if (shouldClearCountdown) {
+  if (!win.__gameSceneInitialized2) {
     win.__gameSceneInitialized2 = true;
-
-    // Force clear ALL countdown timers
-    if (win.__countdownTimers) {
-      win.__countdownTimers.forEach((timer: NodeJS.Timeout) => {
-        clearInterval(timer);
-        clearTimeout(timer);
-      });
-    }
     win.__countdownTimers = [];
-
-    // Force clear countdown state
     win.__countdownState = new Map();
-
-    console.log(`[GameScene Module] ${isDevelopment ? 'Dev mode' : 'Initial load'} - cleared all countdown state`);
+    console.log('[GameScene Module] Countdown state initialized');
   }
 }
 
@@ -962,7 +804,7 @@ function GameScene(props: GameSceneProps) {
 
   const handleContextLost = useCallback((event: Event) => {
     event.preventDefault(); // Prevent default browser handling
-    console.log('[GameScene] WebGL context lost, preventing default handling');
+    console.log('[GameScene] WebGL context lost, preventing page refresh');
     setContextLost(true);
 
     // Clear any existing recovery timeout
@@ -970,11 +812,11 @@ function GameScene(props: GameSceneProps) {
       clearTimeout(contextRecoveryTimeout.current);
     }
 
-    // Attempt recovery after a delay
+    // Don't auto-recover, let user control
     contextRecoveryTimeout.current = setTimeout(() => {
-      console.log('[GameScene] Attempting to restore context');
+      console.log('[GameScene] Context can be restored');
       setContextLost(false);
-    }, 1500);
+    }, 2000);
   }, []);
 
   const handleContextRestored = useCallback(() => {

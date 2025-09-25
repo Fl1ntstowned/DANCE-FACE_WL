@@ -8,27 +8,28 @@ import { Arrow } from '../types';
 interface ArrowMeshProps {
   arrow: Arrow;
   laneX: number;
+  gaugeLevel?: number;
 }
 
-export default function ArrowMesh({ arrow, laneX }: ArrowMeshProps) {
+export default function ArrowMesh({ arrow, laneX, gaugeLevel = 30 }: ArrowMeshProps) {
   const meshRef = useRef<THREE.Group>(null);
 
-  useFrame((state) => {
+  useFrame(() => {
     try {
       if (meshRef.current) {
-        // NO ROTATION - arrows should maintain their direction
-
-        // Pulse effect when close to target
-        if (Math.abs(arrow.position) < 3) {
-          const scale = 1 + Math.sin(state.clock.elapsedTime * 10) * 0.1;
+        // Simple pulse effect when very close to target
+        if (Math.abs(arrow.position) < 2) {
+          const scale = 1.05;
           meshRef.current.scale.set(scale, scale, scale);
+        } else {
+          meshRef.current.scale.set(1, 1, 1);
         }
 
         // Fade out when hit
         if (arrow.hit) {
-          meshRef.current.scale.x *= 0.9;
-          meshRef.current.scale.y *= 0.9;
-          meshRef.current.scale.z *= 0.9;
+          meshRef.current.scale.x *= 0.85;
+          meshRef.current.scale.y *= 0.85;
+          meshRef.current.scale.z *= 0.85;
         }
       }
     } catch (error) {
@@ -49,65 +50,80 @@ export default function ArrowMesh({ arrow, laneX }: ArrowMeshProps) {
 
   const color = getColor();
 
-  // Create simple directional arrow shapes - flat facing the player
+  // Create optimized arrow shapes with simple geometry
   const createArrowShape = () => {
-    // All arrows face the player, simple and clear
     return (
-      <group rotation={[-Math.PI / 2, 0, 0]} scale={[1.5, 1.5, 1.5]}>
+      <group rotation={[-Math.PI / 2, 0, 0]} scale={[1.8, 1.8, 1.8]}>
         {arrow.direction === 'left' && (
-          <>
-            {/* Left arrow ← */}
-            <mesh position={[0.15, 0, 0]}>
-              <boxGeometry args={[0.3, 0.1, 0.05]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+          <group>
+            {/* Simple left arrow */}
+            <mesh position={[0, 0, 0]}>
+              <boxGeometry args={[0.5, 0.15, 0.05]} />
+              <meshBasicMaterial color={color} />
             </mesh>
-            <mesh position={[-0.2, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
-              <coneGeometry args={[0.2, 0.3, 3]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+            <mesh position={[-0.18, 0.1, 0]} rotation={[0, 0, Math.PI / 4]}>
+              <boxGeometry args={[0.3, 0.15, 0.05]} />
+              <meshBasicMaterial color={color} />
             </mesh>
-          </>
+            <mesh position={[-0.18, -0.1, 0]} rotation={[0, 0, -Math.PI / 4]}>
+              <boxGeometry args={[0.3, 0.15, 0.05]} />
+              <meshBasicMaterial color={color} />
+            </mesh>
+          </group>
         )}
 
         {arrow.direction === 'right' && (
-          <>
-            {/* Right arrow → */}
-            <mesh position={[-0.15, 0, 0]}>
-              <boxGeometry args={[0.3, 0.1, 0.05]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+          <group>
+            {/* Simple right arrow */}
+            <mesh position={[0, 0, 0]}>
+              <boxGeometry args={[0.5, 0.15, 0.05]} />
+              <meshBasicMaterial color={color} />
             </mesh>
-            <mesh position={[0.2, 0, 0]} rotation={[0, 0, -Math.PI / 2]}>
-              <coneGeometry args={[0.2, 0.3, 3]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+            <mesh position={[0.18, 0.1, 0]} rotation={[0, 0, -Math.PI / 4]}>
+              <boxGeometry args={[0.3, 0.15, 0.05]} />
+              <meshBasicMaterial color={color} />
             </mesh>
-          </>
+            <mesh position={[0.18, -0.1, 0]} rotation={[0, 0, Math.PI / 4]}>
+              <boxGeometry args={[0.3, 0.15, 0.05]} />
+              <meshBasicMaterial color={color} />
+            </mesh>
+          </group>
         )}
 
         {arrow.direction === 'up' && (
-          <>
-            {/* Up arrow ↑ */}
-            <mesh position={[0, -0.15, 0]}>
-              <boxGeometry args={[0.1, 0.3, 0.05]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+          <group>
+            {/* Simple up arrow */}
+            <mesh position={[0, 0, 0]}>
+              <boxGeometry args={[0.15, 0.5, 0.05]} />
+              <meshBasicMaterial color={color} />
             </mesh>
-            <mesh position={[0, 0.2, 0]} rotation={[0, 0, 0]}>
-              <coneGeometry args={[0.2, 0.3, 3]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+            <mesh position={[-0.1, 0.18, 0]} rotation={[0, 0, -Math.PI / 4]}>
+              <boxGeometry args={[0.15, 0.3, 0.05]} />
+              <meshBasicMaterial color={color} />
             </mesh>
-          </>
+            <mesh position={[0.1, 0.18, 0]} rotation={[0, 0, Math.PI / 4]}>
+              <boxGeometry args={[0.15, 0.3, 0.05]} />
+              <meshBasicMaterial color={color} />
+            </mesh>
+          </group>
         )}
 
         {arrow.direction === 'down' && (
-          <>
-            {/* Down arrow ↓ */}
-            <mesh position={[0, 0.15, 0]}>
-              <boxGeometry args={[0.1, 0.3, 0.05]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+          <group>
+            {/* Simple down arrow */}
+            <mesh position={[0, 0, 0]}>
+              <boxGeometry args={[0.15, 0.5, 0.05]} />
+              <meshBasicMaterial color={color} />
             </mesh>
-            <mesh position={[0, -0.2, 0]} rotation={[0, 0, Math.PI]}>
-              <coneGeometry args={[0.2, 0.3, 3]} />
-              <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.3} />
+            <mesh position={[-0.1, -0.18, 0]} rotation={[0, 0, Math.PI / 4]}>
+              <boxGeometry args={[0.15, 0.3, 0.05]} />
+              <meshBasicMaterial color={color} />
             </mesh>
-          </>
+            <mesh position={[0.1, -0.18, 0]} rotation={[0, 0, -Math.PI / 4]}>
+              <boxGeometry args={[0.15, 0.3, 0.05]} />
+              <meshBasicMaterial color={color} />
+            </mesh>
+          </group>
         )}
       </group>
     );
@@ -117,18 +133,6 @@ export default function ArrowMesh({ arrow, laneX }: ArrowMeshProps) {
     <group ref={meshRef} position={[laneX, -1.5, arrow.position]}>
       {/* Proper directional arrow */}
       {createArrowShape()}
-
-      {/* Subtle glow backdrop */}
-      {!arrow.hit && (
-        <mesh scale={[1.2, 1.2, 0.5]}>
-          <boxGeometry args={[1, 1, 0.1]} />
-          <meshBasicMaterial
-            color={color}
-            transparent
-            opacity={0.15}
-          />
-        </mesh>
-      )}
     </group>
   );
 }
