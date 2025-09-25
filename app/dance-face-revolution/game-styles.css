@@ -5,6 +5,7 @@
   font-family: 'Orbitron', monospace;
   width: 100vw;
   height: 100vh;
+  background: #0a0a2e; /* Ensure game background is always dark blue */
 }
 
 .dfr-container::before {

@@ -2,6 +2,11 @@
 
 /* Force landscape orientation on mobile */
 @media screen and (max-width: 768px) and (orientation: portrait) {
+  /* Force correct background for mobile in portrait */
+  body {
+    background: #0a0a2e !important;
+  }
+
   .mobile-rotate-prompt {
     display: flex;
     position: fixed;
@@ -38,19 +43,26 @@
     margin-bottom: 10px;
   }
 
-  /* Hide all game content in portrait mode */
-  .dfr-container {
+  /* Hide all game content in portrait mode - removed to prevent issues */
+  /* .dfr-container {
     display: none !important;
-  }
+  } */
 }
 
 /* Mobile Landscape Layout */
 @media screen and (max-width: 812px) and (orientation: landscape) {
+  /* Force correct background for mobile */
+  body {
+    background: #0a0a2e !important;
+  }
+
   /* Adjust main container for landscape */
   .dfr-container {
     height: 100vh;
     width: 100vw;
     overflow: hidden;
+    background: #0a0a2e !important; /* Force game background on mobile */
+    display: block !important; /* Ensure container is visible */
   }
 
   /* Touch control zones for mobile */
@@ -244,6 +256,11 @@
 
 /* Hide desktop-only elements on mobile */
 @media screen and (max-width: 812px) {
+  /* Force correct background for all mobile devices */
+  body {
+    background: #0a0a2e !important;
+  }
+
   .desktop-only {
     display: none !important;
   }
