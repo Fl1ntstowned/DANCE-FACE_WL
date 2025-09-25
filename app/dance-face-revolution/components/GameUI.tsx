@@ -13,7 +13,7 @@ export default function GameUI({ score, gaugeLevel = 30 }: GameUIProps) {
   const [showComboAnimation, setShowComboAnimation] = useState(false);
   const [previousCombo, setPreviousCombo] = useState(0);
   const [animatedGauge, setAnimatedGauge] = useState(gaugeLevel);
-  const isHeatingUp = gaugeLevel > 50;
+  const isHeatingUp = animatedGauge > 50;
   const isMaxPower = animatedGauge >= 100;
 
   // Smoothly animate gauge changes
@@ -103,9 +103,10 @@ export default function GameUI({ score, gaugeLevel = 30 }: GameUIProps) {
       {/* Health/Dance Gauge */}
       <div className="dance-gauge">
         <div className="gauge-container">
-          <motion.div
+          <div
             className="gauge-fill"
             style={{
+              width: `${Math.max(2, animatedGauge)}%`,
               background: isMaxPower
                 ? `linear-gradient(90deg, #ff00ff 0%, #ff69b4 20%, #00ffff 40%, #ffff00 60%, #ff00ff 80%, #ff1493 100%)`
                 : animatedGauge >= 80
@@ -117,26 +118,20 @@ export default function GameUI({ score, gaugeLevel = 30 }: GameUIProps) {
                 : animatedGauge >= 20
                 ? `linear-gradient(90deg, #ff8800 0%, #ff6600 50%, #ff4400 100%)`
                 : `linear-gradient(90deg, #ff0000 0%, #ff3333 50%, #ff6666 100%)`,
-              boxShadow: isMaxPower ? '0 0 40px #ff00ff, 0 0 60px #ffff00, inset 0 0 30px rgba(255,255,255,0.8)' :
-                        animatedGauge >= 80 ? '0 0 30px #ff00ff, inset 0 0 20px rgba(255,255,255,0.5)' :
-                        animatedGauge >= 60 ? '0 0 20px #00ffff, inset 0 0 15px rgba(255,255,255,0.3)' :
-                        animatedGauge >= 40 ? '0 0 15px #ffff00' : '0 0 10px currentColor'
-            }}
-            animate={{
-              width: `${Math.max(2, animatedGauge)}%`, // Minimum 2% so it's always visible
-              filter: isMaxPower ? [
-                'brightness(1.2) saturate(1.5)',
-                'brightness(1.5) saturate(2)',
-                'brightness(1.2) saturate(1.5)',
-              ] : isHeatingUp ? [
-                'brightness(1)',
-                'brightness(1.3)',
-                'brightness(1)',
-              ] : 'brightness(1)'
-            }}
-            transition={{
-              width: { type: 'spring', stiffness: 100, damping: 15 },
-              filter: { duration: isMaxPower ? 0.3 : 0.5, repeat: (isHeatingUp || isMaxPower) ? Infinity : 0 }
+              filter: isMaxPower ? 'brightness(1.5) saturate(1.5)' :
+                      animatedGauge >= 80 ? 'brightness(1.3) saturate(1.3)' :
+                      animatedGauge >= 60 ? 'brightness(1.2) saturate(1.2)' :
+                      'brightness(1.1) saturate(1.1)',
+              height: '100%',
+              borderRadius: '17px',
+              position: 'relative',
+              zIndex: 10,
+              transition: 'width 0.3s ease, filter 0.3s ease',
+              boxShadow: isMaxPower ? '0 0 50px #ff00ff, 0 0 80px #ffff00, inset 0 0 40px rgba(255,255,255,0.9)' :
+                        animatedGauge >= 80 ? '0 0 40px #ff00ff, inset 0 0 30px rgba(255,255,255,0.7)' :
+                        animatedGauge >= 60 ? '0 0 30px #00ffff, inset 0 0 20px rgba(255,255,255,0.5)' :
+                        animatedGauge >= 40 ? '0 0 20px #ffff00, inset 0 0 15px rgba(255,255,255,0.3)' :
+                        '0 0 15px currentColor, inset 0 0 10px rgba(255,255,255,0.2)'
             }}
           />
 
@@ -313,7 +308,7 @@ export default function GameUI({ score, gaugeLevel = 30 }: GameUIProps) {
           border-radius: 17px;
           position: relative;
           z-index: 10;
-          transition: background 0.3s ease, width 0.3s ease;
+          transition: width 0.3s ease;
         }
 
         .gauge-segments {
