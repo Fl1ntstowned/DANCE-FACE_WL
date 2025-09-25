@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "DANCEFACE - Revolutionary Ordinal Collection",
   description: "First fully rigged GLB ordinal inscription with hybrid code-based animation",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  viewport: "width=device-width, initial-scale=1.0",
 };
 
 export default function RootLayout({

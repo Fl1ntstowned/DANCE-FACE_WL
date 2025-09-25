@@ -19,3 +19,48 @@
     opacity: 1;
   }
 }
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    transform: translateX(-100%) rotateY(-45deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%) rotateY(45deg);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0) rotateY(0deg);
+    opacity: 1;
+  }
+}
+
+.carousel-container {
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease;
+}
+
+.carousel-card {
+  transition: all 0.4s ease;
+  transform-style: preserve-3d;
+}
+
+.carousel-card:hover {
+  transform: translateY(-5px);
+}

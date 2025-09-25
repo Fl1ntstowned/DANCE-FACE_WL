@@ -94,7 +94,7 @@ export default function Home() {
   }
 
   return (
-    <main className="min-h-screen bg-black overflow-x-hidden relative scanlines tv-static">
+    <main className="min-h-screen bg-black overflow-hidden relative scanlines tv-static">
       {/* Performance Monitor for Development */}
       {deviceInfo.isMobile && <PerformanceMonitor />}
       
@@ -312,34 +312,34 @@ export default function Home() {
       </div>
 
 
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        <motion.div 
+      <div className="relative z-10 container mx-auto px-4 py-2">
+        <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-4"
         >
           {/* DDR Score/Combo Style Display */}
-          <div className="flex justify-center gap-8 mb-4">
-            <div className="text-yellow-400 font-bold text-lg md:text-xl neon-glow">
+          <div className="flex justify-center gap-6 mb-3">
+            <div className="text-yellow-400 font-bold text-base md:text-lg neon-glow">
               <span className="text-xs chrome-text">SCORE</span>
-              <div className="text-2xl md:text-3xl holographic-text">999999</div>
+              <div className="text-xl md:text-2xl holographic-text">999999</div>
             </div>
-            <div className="text-pink-500 font-bold text-lg md:text-xl neon-glow">
+            <div className="text-pink-500 font-bold text-base md:text-lg neon-glow">
               <span className="text-xs chrome-text">COMBO</span>
-              <div className="text-2xl md:text-3xl animate-pulse holographic-text">MAX!</div>
+              <div className="text-xl md:text-2xl animate-pulse holographic-text">MAX!</div>
             </div>
           </div>
           
-          <h1 className="text-6xl md:text-7xl lg:text-8xl font-black mb-6 relative inline-block perspective-1000">
+          <h1 className="text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-black mb-2 relative inline-block perspective-1000">
             <span className="chrome-animated text-3d-title inline-block mr-4 glitch-text" data-text="DANCE">
               DANCE
             </span>
             <span className="holographic-text text-3d-title inline-block animate-float-slow animation-delay-500">
               FACE
             </span>
-            <div className="absolute -top-6 -right-6 text-yellow-400 text-3xl animate-spin-slow text-3d">✦</div>
-            <div className="absolute -bottom-6 -left-6 text-pink-500 text-3xl animate-spin-slow animation-delay-200 text-3d">♫</div>
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-8 text-green-400 text-2xl animate-bounce text-3d">✨</div>
+            <div className="absolute -top-4 -right-4 text-yellow-400 text-2xl animate-spin-slow text-3d">✦</div>
+            <div className="absolute -bottom-4 -left-4 text-pink-500 text-2xl animate-spin-slow animation-delay-200 text-3d">♫</div>
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 text-green-400 text-xl animate-bounce text-3d">✨</div>
           </h1>
           
           <div className="flex items-center justify-center gap-2 mb-2">
@@ -404,7 +404,7 @@ export default function Home() {
           </a>
         </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4 items-start max-w-5xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}

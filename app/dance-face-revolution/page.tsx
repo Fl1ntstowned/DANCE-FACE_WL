@@ -218,26 +218,6 @@ export default function DanceFaceRevolution() {
     <main className="dfr-container">
       <audio ref={audioRef} />
 
-      {/* Debug State Display */}
-      <div style={{
-        position: 'fixed',
-        top: '60px',
-        right: '10px',
-        background: 'rgba(255,0,0,0.9)',
-        padding: '10px',
-        borderRadius: '5px',
-        fontSize: '14px',
-        color: '#ffffff',
-        zIndex: 9999
-      }}>
-        <div>Game State: {gameState}</div>
-        <div>Difficulty: {difficulty}</div>
-        <div>Song: {selectedSong?.title || 'None'}</div>
-        <div>Gauge: {gaugeLevel.toFixed(1)}%</div>
-        <div>Combo: {score.combo}</div>
-        <div>Accuracy: {score.accuracy.toFixed(1)}%</div>
-      </div>
-
       <AnimatePresence mode="wait">
         {gameState === 'menu' && (
           <StartScreen

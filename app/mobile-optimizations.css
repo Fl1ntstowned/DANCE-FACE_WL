@@ -134,11 +134,7 @@
   }
   
   /* Performance: Use transform3d for hardware acceleration */
-  * {
-    -webkit-transform: translateZ(0);
-    -webkit-backface-visibility: hidden;
-    -webkit-perspective: 1000;
-  }
+  /* Removed global transform that was causing zoom issues */
   
   /* Reduce animation frame rate */
   @keyframes pulse {

@@ -23,7 +23,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
-  overflow-x: hidden;
+  overflow: hidden;
+  min-height: 100vh;
+  width: 100vw;
 }
 
 * {
@@ -32,10 +34,55 @@ body {
 
 html {
   scroll-behavior: smooth;
+  /* Prevent browser zoom issues */
+  -webkit-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* Ensure no overflow that could cause zoom */
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+/* Reset any potential zoom or transform on root elements */
+html, body, #__next, main {
+  transform: none !important;
+  zoom: 1 !important;
+  max-width: 100vw !important;
+}
+
+/* Prevent container overflow */
+.container {
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+}
+
+/* Scale content to fit viewport */
+.scale-to-fit {
+  transform: scale(0.85);
+  transform-origin: center top;
+}
+
+/* DDR screen specific scaling */
+.dfr-scale-wrapper {
+  transform: scale(0.85);
+  transform-origin: center center;
+}
+
+/* Responsive adjustments */
+@media (min-width: 1600px) {
+  .scale-to-fit {
+    transform: scale(1) !important;
+  }
+  .dfr-scale-wrapper {
+    transform: scale(1) !important;
+  }
 }
 
 @media (max-width: 768px) {
-  html {
-    font-size: 14px;
+  .scale-to-fit {
+    transform: scale(0.7) !important;
+  }
+  .dfr-scale-wrapper {
+    transform: scale(0.7) !important;
   }
 }
