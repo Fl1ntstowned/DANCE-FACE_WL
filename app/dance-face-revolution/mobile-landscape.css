@@ -327,13 +327,22 @@
     overflow-x: hidden !important;
     height: auto !important;
     min-height: 100vh !important;
+    position: relative !important; /* Not fixed */
   }
 
-  /* Allow main container to scroll */
+  /* Allow main container to scroll - OVERRIDE game-styles.css */
   main, .dfr-container {
     overflow: visible !important;
+    overflow-y: visible !important;
     height: auto !important;
     min-height: 100vh !important;
+    position: relative !important; /* Not fixed */
+  }
+
+  /* Extra override for any nested containers */
+  .game-container {
+    overflow: visible !important;
+    height: auto !important;
   }
 
   .desktop-only {
