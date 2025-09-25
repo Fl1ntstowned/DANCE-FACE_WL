@@ -5,9 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import GameUI from './components/GameUI';
 import Leaderboard from './components/Leaderboard';
+import LeaderboardSubmission from './components/LeaderboardSubmission';
 import StartScreen from './components/StartScreen';
-import { GameState, GameScore } from './types';
+import { GameState, GameScore, LeaderboardSubmission as LeaderboardSubmissionData } from './types';
 import { Song } from './songData';
+import leaderboardAPI from '../lib/leaderboard-api';
 import './game-styles.css';
 
 // Dynamic import GameScene to avoid SSR issues with Three.js
@@ -42,6 +44,7 @@ export default function DanceFaceRevolution() {
   });
   const [gaugeLevel, setGaugeLevel] = useState(30); // Track gauge level at top level
   const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showSubmission, setShowSubmission] = useState(false);
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | 'extreme'>('medium');
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -76,12 +79,57 @@ export default function DanceFaceRevolution() {
     if (audioRef.current) {
       audioRef.current.pause();
     }
+    // Show submission form after game ends
+    setShowSubmission(true);
   }, []);
 
   const returnToMenu = useCallback(() => {
     setGameState('menu');
     setShowLeaderboard(false);
+    setShowSubmission(false);
   }, []);
+
+  const handleLeaderboardSubmit = async (data: { xHandle: string; walletAddress: string }) => {
+    if (!selectedSong) return;
+
+    const grade = score.accuracy >= 95 ? 'SSS' :
+                  score.accuracy >= 90 ? 'SS' :
+                  score.accuracy >= 85 ? 'S' :
+                  score.accuracy >= 80 ? 'A' :
+                  score.accuracy >= 70 ? 'B' :
+                  score.accuracy >= 60 ? 'C' :
+                  score.accuracy >= 50 ? 'D' : 'F';
+
+    const submission: LeaderboardSubmissionData = {
+      xHandle: data.xHandle,
+      walletAddress: data.walletAddress,
+      score: score.points,
+      combo: score.maxCombo,
+      accuracy: score.accuracy,
+      grade,
+      difficulty,
+      songTitle: selectedSong.title,
+      perfect: score.perfect,
+      great: score.great,
+      good: score.good,
+      miss: score.miss
+    };
+
+    try {
+      const result = await leaderboardAPI.submitScore(submission);
+      console.log('Score submitted:', result);
+
+      // Store wallet for future use
+      localStorage.setItem('userWallet', data.walletAddress);
+    } catch (error) {
+      console.error('Failed to submit score:', error);
+      throw error;
+    }
+  };
+
+  const handleSkipSubmission = () => {
+    setShowSubmission(false);
+  };
 
   const updateScore = useCallback((update: Partial<GameScore> | ((prev: GameScore) => Partial<GameScore>)) => {
     setScore(prev => {
@@ -226,7 +274,7 @@ export default function DanceFaceRevolution() {
           </motion.div>
         )}
 
-        {gameState === 'results' && (
+        {gameState === 'results' && !showSubmission && (
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -291,6 +339,16 @@ export default function DanceFaceRevolution() {
               </button>
             </div>
           </motion.div>
+        )}
+
+        {showSubmission && selectedSong && (
+          <LeaderboardSubmission
+            score={score}
+            difficulty={difficulty}
+            songTitle={selectedSong.title}
+            onSubmit={handleLeaderboardSubmit}
+            onSkip={handleSkipSubmission}
+          />
         )}
 
         {showLeaderboard && (

@@ -3,77 +3,71 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LeaderboardEntry } from '../types';
+import leaderboardAPI from '../../lib/leaderboard-api';
 
 interface LeaderboardProps {
   onClose: () => void;
 }
 
-// Mock data - replace with actual API calls
-const mockLeaderboard: LeaderboardEntry[] = [
-  {
-    rank: 1,
-    address: '0x1234...5678',
-    username: 'CryptoDancer',
-    score: 999999,
-    combo: 420,
-    accuracy: 98.5,
-    grade: 'SSS',
-    timestamp: Date.now() - 86400000
-  },
-  {
-    rank: 2,
-    address: '0xabcd...efgh',
-    username: 'SatoshiMoves',
-    score: 875000,
-    combo: 350,
-    accuracy: 95.2,
-    grade: 'SS',
-    timestamp: Date.now() - 172800000
-  },
-  {
-    rank: 3,
-    address: '0x9876...5432',
-    username: 'Web3Warrior',
-    score: 750000,
-    combo: 280,
-    accuracy: 92.8,
-    grade: 'S',
-    timestamp: Date.now() - 259200000
-  },
-  {
-    rank: 4,
-    address: '0xface...b00k',
-    username: 'NFTNinja',
-    score: 650000,
-    combo: 220,
-    accuracy: 89.5,
-    grade: 'A',
-    timestamp: Date.now() - 345600000
-  },
-  {
-    rank: 5,
-    address: '0xdead...beef',
-    username: 'BlockchainBaller',
-    score: 550000,
-    combo: 180,
-    accuracy: 85.3,
-    grade: 'A',
-    timestamp: Date.now() - 432000000
-  }
-];
-
 export default function Leaderboard({ onClose }: LeaderboardProps) {
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [timeFilter, setTimeFilter] = useState<'all' | 'daily' | 'weekly' | 'monthly'>('all');
+  const [difficultyFilter, setDifficultyFilter] = useState<'all' | 'easy' | 'medium' | 'hard' | 'extreme'>('all');
+  const [userStats, setUserStats] = useState<{ bestScore: LeaderboardEntry | null; totalGames: number } | null>(null);
+  const [userWallet, setUserWallet] = useState<string | null>(null);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      setLeaderboard(mockLeaderboard);
+    fetchLeaderboard();
+    checkUserWallet();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeFilter, difficultyFilter]);
+
+  const fetchLeaderboard = async () => {
+    setLoading(true);
+    try {
+      const data = await leaderboardAPI.getLeaderboard({
+        difficulty: difficultyFilter,
+        timeFilter,
+        limit: 100
+      });
+      setLeaderboard(data);
+    } catch (error) {
+      console.error('Failed to fetch leaderboard:', error);
+      setLeaderboard([]);
+    } finally {
       setLoading(false);
-    }, 500);
-  }, []);
+    }
+  };
+
+  const checkUserWallet = async () => {
+    try {
+      // Try to get wallet from localStorage or connect to Satoshi Browser
+      const storedWallet = localStorage.getItem('userWallet');
+      if (storedWallet) {
+        setUserWallet(storedWallet);
+        const stats = await leaderboardAPI.getUserStats(storedWallet);
+        setUserStats(stats);
+      }
+    } catch (error) {
+      console.error('Failed to get user stats:', error);
+    }
+  };
+
+  const connectWallet = async () => {
+    try {
+      const wallet = await leaderboardAPI.connectSatoshiBrowser();
+      if (wallet) {
+        localStorage.setItem('userWallet', wallet);
+        setUserWallet(wallet);
+        const stats = await leaderboardAPI.getUserStats(wallet);
+        setUserStats(stats);
+      }
+    } catch (error) {
+      console.error('Failed to connect wallet:', error);
+      alert(error instanceof Error ? error.message : 'Failed to connect wallet');
+    }
+  };
 
   const getWhitelistStatus = (rank: number) => {
     if (rank <= 10) return { eligible: true, tier: 'LEGENDARY' };
@@ -176,25 +170,72 @@ export default function Leaderboard({ onClose }: LeaderboardProps) {
           </div>
         </motion.div>
 
-        {/* Time Filter */}
-        <div style={{ display: 'flex', gap: '1rem', marginBottom: '2rem', justifyContent: 'center' }}>
-          {(['all', 'daily', 'weekly', 'monthly'] as const).map(filter => (
-            <button
-              key={filter}
-              onClick={() => setTimeFilter(filter)}
-              style={{
-                padding: '0.5rem 1.5rem',
-                background: timeFilter === filter ? 'rgba(255, 0, 255, 0.3)' : 'transparent',
-                border: `1px solid ${timeFilter === filter ? '#ff00ff' : 'rgba(255, 255, 255, 0.3)'}`,
-                borderRadius: '20px',
-                color: timeFilter === filter ? '#ff00ff' : '#ffffff',
-                cursor: 'pointer',
-                textTransform: 'uppercase'
-              }}
-            >
-              {filter}
-            </button>
-          ))}
+        {/* Filters */}
+        <div style={{ marginBottom: '2rem' }}>
+          {/* Time Filter */}
+          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', justifyContent: 'center' }}>
+            {(['all', 'daily', 'weekly', 'monthly'] as const).map(filter => (
+              <button
+                key={filter}
+                onClick={() => setTimeFilter(filter)}
+                style={{
+                  padding: '0.5rem 1.5rem',
+                  background: timeFilter === filter ? 'rgba(255, 0, 255, 0.3)' : 'transparent',
+                  border: `1px solid ${timeFilter === filter ? '#ff00ff' : 'rgba(255, 255, 255, 0.3)'}`,
+                  borderRadius: '20px',
+                  color: timeFilter === filter ? '#ff00ff' : '#ffffff',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  fontSize: '0.9rem'
+                }}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+
+          {/* Difficulty Filter */}
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
+            {(['all', 'easy', 'medium', 'hard', 'extreme'] as const).map(diff => (
+              <button
+                key={diff}
+                onClick={() => setDifficultyFilter(diff)}
+                style={{
+                  padding: '0.4rem 1rem',
+                  background: difficultyFilter === diff
+                    ? diff === 'easy' ? 'rgba(0, 255, 0, 0.3)'
+                    : diff === 'medium' ? 'rgba(255, 255, 0, 0.3)'
+                    : diff === 'hard' ? 'rgba(255, 136, 0, 0.3)'
+                    : diff === 'extreme' ? 'rgba(255, 0, 0, 0.3)'
+                    : 'rgba(128, 0, 255, 0.3)'
+                    : 'transparent',
+                  border: `1px solid ${
+                    difficultyFilter === diff
+                      ? diff === 'easy' ? '#00ff00'
+                      : diff === 'medium' ? '#ffff00'
+                      : diff === 'hard' ? '#ff8800'
+                      : diff === 'extreme' ? '#ff0000'
+                      : '#8000ff'
+                      : 'rgba(255, 255, 255, 0.3)'
+                  }`,
+                  borderRadius: '15px',
+                  color: difficultyFilter === diff
+                    ? diff === 'easy' ? '#00ff00'
+                    : diff === 'medium' ? '#ffff00'
+                    : diff === 'hard' ? '#ff8800'
+                    : diff === 'extreme' ? '#ff0000'
+                    : '#8000ff'
+                    : '#ffffff',
+                  cursor: 'pointer',
+                  textTransform: 'uppercase',
+                  fontSize: '0.85rem',
+                  fontWeight: difficultyFilter === diff ? 'bold' : 'normal'
+                }}
+              >
+                {diff}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Leaderboard Table */}
@@ -210,6 +251,7 @@ export default function Leaderboard({ onClose }: LeaderboardProps) {
                   <th style={{ padding: '1rem', textAlign: 'left', color: '#ff00ff' }}>RANK</th>
                   <th style={{ padding: '1rem', textAlign: 'left', color: '#ff00ff' }}>PLAYER</th>
                   <th style={{ padding: '1rem', textAlign: 'center', color: '#ff00ff' }}>SCORE</th>
+                  <th style={{ padding: '1rem', textAlign: 'center', color: '#ff00ff' }}>DIFFICULTY</th>
                   <th style={{ padding: '1rem', textAlign: 'center', color: '#ff00ff' }}>COMBO</th>
                   <th style={{ padding: '1rem', textAlign: 'center', color: '#ff00ff' }}>ACCURACY</th>
                   <th style={{ padding: '1rem', textAlign: 'center', color: '#ff00ff' }}>GRADE</th>
@@ -241,13 +283,31 @@ export default function Leaderboard({ onClose }: LeaderboardProps) {
                           </span>
                         </td>
                         <td style={{ padding: '1rem' }}>
-                          <div style={{ color: '#00ffff' }}>{entry.username || 'Anonymous'}</div>
-                          <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.8rem' }}>
-                            {entry.address}
+                          <div style={{ color: '#00ffff' }}>{entry.xHandle || entry.username || 'Anonymous'}</div>
+                          <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.8rem', fontFamily: 'monospace' }}>
+                            {entry.walletAddress || entry.address}
                           </div>
+                          {entry.songTitle && (
+                            <div style={{ color: 'rgba(255, 255, 255, 0.4)', fontSize: '0.75rem' }}>
+                              {entry.songTitle}
+                            </div>
+                          )}
                         </td>
                         <td style={{ padding: '1rem', textAlign: 'center', color: '#ffff00', fontWeight: 'bold' }}>
                           {entry.score.toLocaleString()}
+                        </td>
+                        <td style={{
+                          padding: '1rem',
+                          textAlign: 'center',
+                          color: entry.difficulty === 'easy' ? '#00ff00'
+                               : entry.difficulty === 'medium' ? '#ffff00'
+                               : entry.difficulty === 'hard' ? '#ff8800'
+                               : '#ff0000',
+                          textTransform: 'uppercase',
+                          fontWeight: 'bold',
+                          fontSize: '0.9rem'
+                        }}>
+                          {entry.difficulty}
                         </td>
                         <td style={{ padding: '1rem', textAlign: 'center', color: '#ff00ff' }}>
                           {entry.combo}x
@@ -314,27 +374,80 @@ export default function Leaderboard({ onClose }: LeaderboardProps) {
           transition={{ delay: 0.5 }}
         >
           <h3 style={{ color: '#ff00ff', marginBottom: '1rem' }}>YOUR BEST SCORE</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
-            <div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>SCORE</div>
-              <div style={{ color: '#ffff00', fontSize: '1.5rem', fontWeight: 'bold' }}>--</div>
-            </div>
-            <div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>RANK</div>
-              <div style={{ color: '#00ffff', fontSize: '1.5rem', fontWeight: 'bold' }}>--</div>
-            </div>
-            <div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>COMBO</div>
-              <div style={{ color: '#ff00ff', fontSize: '1.5rem', fontWeight: 'bold' }}>--</div>
-            </div>
-            <div>
-              <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>ACCURACY</div>
-              <div style={{ color: '#00ff00', fontSize: '1.5rem', fontWeight: 'bold' }}>--%</div>
-            </div>
-          </div>
-          <p style={{ color: '#ff00ff', marginTop: '1rem', textAlign: 'center' }}>
-            Connect your wallet to track your scores!
-          </p>
+          {userStats && userStats.bestScore ? (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>SCORE</div>
+                  <div style={{ color: '#ffff00', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                    {userStats.bestScore.score.toLocaleString()}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>RANK</div>
+                  <div style={{ color: '#00ffff', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                    #{userStats.bestScore.rank}
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>COMBO</div>
+                  <div style={{ color: '#ff00ff', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                    {userStats.bestScore.combo}x
+                  </div>
+                </div>
+                <div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>ACCURACY</div>
+                  <div style={{ color: '#00ff00', fontSize: '1.5rem', fontWeight: 'bold' }}>
+                    {userStats.bestScore.accuracy.toFixed(1)}%
+                  </div>
+                </div>
+              </div>
+              <p style={{ color: '#00ffff', marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem' }}>
+                Total games played: {userStats.totalGames}
+              </p>
+            </>
+          ) : userWallet ? (
+            <p style={{ color: '#ffff00', textAlign: 'center' }}>
+              No scores recorded yet. Play a game to get on the leaderboard!
+            </p>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
+                <div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>SCORE</div>
+                  <div style={{ color: '#ffff00', fontSize: '1.5rem', fontWeight: 'bold' }}>--</div>
+                </div>
+                <div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>RANK</div>
+                  <div style={{ color: '#00ffff', fontSize: '1.5rem', fontWeight: 'bold' }}>--</div>
+                </div>
+                <div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>COMBO</div>
+                  <div style={{ color: '#ff00ff', fontSize: '1.5rem', fontWeight: 'bold' }}>--</div>
+                </div>
+                <div>
+                  <div style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.8rem' }}>ACCURACY</div>
+                  <div style={{ color: '#00ff00', fontSize: '1.5rem', fontWeight: 'bold' }}>--%</div>
+                </div>
+              </div>
+              <button
+                onClick={connectWallet}
+                style={{
+                  background: 'linear-gradient(45deg, #ff00ff, #00ffff)',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '0.75rem 2rem',
+                  color: '#ffffff',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  marginTop: '1rem',
+                  width: '100%'
+                }}
+              >
+                Connect Satoshi Browser Wallet
+              </button>
+            </>
+          )}
         </motion.div>
       </motion.div>
     </motion.div>

@@ -14,16 +14,19 @@ export interface Song {
   file: string;
 }
 
-export const songs: Song[] = [
-  {
-    id: 'tutorial',
-    title: 'Tutorial Track',
-    artist: 'DanceFace',
-    bpm: 120,
-    genre: 'Tutorial',
-    difficulty: { easy: 1, medium: 2, hard: 3, extreme: 4 },
-    file: '/Untitled video - Made with Clipchamp.m4a'
-  },
+// Tutorial track only for development
+const tutorialTrack: Song = {
+  id: 'tutorial',
+  title: 'Tutorial Track',
+  artist: 'DanceFace',
+  bpm: 120,
+  genre: 'Tutorial',
+  difficulty: { easy: 1, medium: 2, hard: 3, extreme: 4 },
+  file: '/Untitled video - Made with Clipchamp.m4a'
+};
+
+// Main song list
+const mainSongs: Song[] = [
   {
     id: '1988',
     title: '1988',
@@ -187,3 +190,14 @@ export const songs: Song[] = [
     file: '/ES_Xtra - rh3a bluu.mp3'
   }
 ];
+
+// Check if we're in development mode
+const isDevelopment = process.env.NODE_ENV === 'development' ||
+                      (typeof window !== 'undefined' &&
+                       (window.location.hostname === 'localhost' ||
+                        window.location.hostname === '127.0.0.1'));
+
+// Export songs with tutorial track in development, without in production
+export const songs: Song[] = isDevelopment
+  ? [tutorialTrack, ...mainSongs]
+  : mainSongs;

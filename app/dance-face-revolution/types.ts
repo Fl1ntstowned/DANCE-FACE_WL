@@ -36,13 +36,36 @@ export interface PlayerData {
 
 export interface LeaderboardEntry {
   rank: number;
-  address: string;
+  address?: string;
+  walletAddress?: string;
   username?: string;
+  xHandle?: string;
   score: number;
   combo: number;
   accuracy: number;
   grade: string;
+  difficulty: 'easy' | 'medium' | 'hard' | 'extreme';
+  songTitle: string;
   timestamp: number;
+  perfect?: number;
+  great?: number;
+  good?: number;
+  miss?: number;
+}
+
+export interface LeaderboardSubmission {
+  xHandle: string;
+  walletAddress: string;
+  score: number;
+  combo: number;
+  accuracy: number;
+  grade: string;
+  difficulty: 'easy' | 'medium' | 'hard' | 'extreme';
+  songTitle: string;
+  perfect: number;
+  great: number;
+  good: number;
+  miss: number;
 }
 
 export interface Song {
