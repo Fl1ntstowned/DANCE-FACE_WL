@@ -20,6 +20,7 @@ interface GameSceneProps {
   currentGauge?: number;
   songDuration?: number;
   songBPM?: number;
+  onArrowHit?: (direction: ArrowDirection) => void;
 }
 
 interface GameScore {
@@ -195,7 +196,7 @@ if (typeof window !== 'undefined') {
   }
 }
 
-function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeUpdate, currentGauge = 30, songDuration = 120, songBPM = 128, renderStage = 3, sceneReady = false }: GameSceneProps & { renderStage?: number; sceneReady?: boolean }) {
+function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeUpdate, currentGauge = 30, songDuration = 120, songBPM = 128, onArrowHit: externalArrowHit, renderStage = 3, sceneReady = false }: GameSceneProps & { renderStage?: number; sceneReady?: boolean }) {
   const instanceId = useRef(`gc-${Date.now()}`);
   const [isActive, setIsActive] = useState(false);
   const [arrows, setArrows] = useState<Arrow[]>([]);
@@ -516,6 +517,14 @@ function GameContent({ difficulty, onUpdateScore, onEndGame, isPlaying, onGaugeU
       return updated;
     });
   }, [onUpdateScore, localGauge, updateGauge, difficulty, isPlaying]);
+
+  // Expose handleArrowHit to parent component for touch controls
+  useEffect(() => {
+    if (externalArrowHit) {
+      const win = window as any;
+      win.__gameArrowHit = handleArrowHit;
+    }
+  }, [externalArrowHit, handleArrowHit]);
 
   // Keyboard input handling with repeat prevention
   useEffect(() => {

@@ -7,10 +7,13 @@ import GameUI from './components/GameUI';
 import Leaderboard from './components/Leaderboard';
 import LeaderboardSubmission from './components/LeaderboardSubmission';
 import StartScreen from './components/StartScreen';
-import { GameState, GameScore, LeaderboardSubmission as LeaderboardSubmissionData } from './types';
+import MobileTouchControls from './components/MobileTouchControls';
+import MobileRotatePrompt from './components/MobileRotatePrompt';
+import { GameState, GameScore, LeaderboardSubmission as LeaderboardSubmissionData, ArrowDirection } from './types';
 import { Song } from './songData';
 import leaderboardAPI from '../lib/leaderboard-api';
 import './game-styles.css';
+import './mobile-landscape.css';
 
 // Dynamic import GameScene to avoid SSR issues with Three.js
 const GameScene = dynamic(() => import('./components/GameScene'), {
@@ -48,6 +51,15 @@ export default function DanceFaceRevolution() {
   const [selectedSong, setSelectedSong] = useState<Song | null>(null);
   const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard' | 'extreme'>('medium');
   const audioRef = useRef<HTMLAudioElement>(null);
+
+  // Handle arrow hits from mobile touch controls
+  const handleArrowHit = useCallback((direction: ArrowDirection) => {
+    // This will be connected to the GameScene's handleArrowHit
+    const win = window as unknown as {__gameArrowHit?: (direction: ArrowDirection) => void};
+    if (win.__gameArrowHit) {
+      win.__gameArrowHit(direction);
+    }
+  }, []);
 
   const startGame = useCallback((song: Song, diff: typeof difficulty) => {
     console.log('[DanceFaceRevolution] Starting game:', { song: song.title, diff, duration: song.duration });
@@ -217,6 +229,7 @@ export default function DanceFaceRevolution() {
   return (
     <main className="dfr-container">
       <audio ref={audioRef} />
+      <MobileRotatePrompt />
 
       <AnimatePresence mode="wait">
         {gameState === 'menu' && (
@@ -249,8 +262,13 @@ export default function DanceFaceRevolution() {
               currentGauge={gaugeLevel}
               songDuration={selectedSong?.duration || 120}
               songBPM={selectedSong?.bpm || 128}
+              onArrowHit={handleArrowHit}
             />
             <GameUI score={score} gaugeLevel={gaugeLevel} />
+            <MobileTouchControls
+              onArrowHit={handleArrowHit}
+              isPlaying={gameState === 'playing'}
+            />
           </motion.div>
         )}
 

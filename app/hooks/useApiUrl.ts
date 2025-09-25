@@ -7,9 +7,12 @@ export const useApiUrl = () => {
     // Check if we're in the browser
     if (typeof window !== 'undefined') {
       const hostname = window.location.hostname;
-      
-      // If we're on Railway production, use the production backend
-      if (hostname === 'dance-face-wl.up.railway.app' || hostname.includes('railway.app')) {
+
+      // If we're on satoshibrowser.xyz, use the production backend
+      if (hostname === 'satoshibrowser.xyz' || hostname === 'www.satoshibrowser.xyz') {
+        setApiUrl('https://dance-face-wl-backend-production.up.railway.app');
+      } else if (hostname === 'dance-face-wl.up.railway.app' || hostname.includes('railway.app')) {
+        // Railway production
         setApiUrl('https://dance-face-wl-backend-production.up.railway.app');
       } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
         // Local development

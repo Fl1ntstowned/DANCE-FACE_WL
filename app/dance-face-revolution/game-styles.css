@@ -3,6 +3,8 @@
   position: relative;
   overflow: hidden;
   font-family: 'Orbitron', monospace;
+  width: 100vw;
+  height: 100vh;
 }
 
 .dfr-container::before {

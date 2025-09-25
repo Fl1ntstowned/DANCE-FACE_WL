@@ -86,41 +86,7 @@ export const leaderboardAPI = {
     }
   },
 
-  // Connect to Satoshi Browser for wallet verification
-  async connectSatoshiBrowser(): Promise<string | null> {
-    try {
-      // Check if Satoshi Browser extension is available
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (typeof window !== 'undefined' && (window as any).satoshi) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const satoshi = (window as any).satoshi;
-
-        // Request wallet connection
-        const accounts = await satoshi.requestAccounts();
-
-        if (accounts && accounts.length > 0) {
-          // Get the first taproot address
-          const address = accounts[0];
-
-          // Validate that it's a taproot address
-          if (address.startsWith('bc1p') || address.startsWith('tb1p')) {
-            return address;
-          } else {
-            throw new Error('Please select a Taproot address (starting with bc1p or tb1p)');
-          }
-        }
-      } else {
-        // If Satoshi Browser is not installed, open the website
-        window.open('https://satoshibrowser.xyz', '_blank');
-        return null;
-      }
-    } catch (error) {
-      console.error('Error connecting to Satoshi Browser:', error);
-      throw error;
-    }
-
-    return null;
-  },
+  // Wallet connect functionality removed - users now input wallet address directly
 
   // Check if wallet is whitelisted
   async checkWhitelistStatus(walletAddress: string): Promise<boolean> {

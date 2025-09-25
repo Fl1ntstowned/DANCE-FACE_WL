@@ -54,20 +54,7 @@ export default function Leaderboard({ onClose }: LeaderboardProps) {
     }
   };
 
-  const connectWallet = async () => {
-    try {
-      const wallet = await leaderboardAPI.connectSatoshiBrowser();
-      if (wallet) {
-        localStorage.setItem('userWallet', wallet);
-        setUserWallet(wallet);
-        const stats = await leaderboardAPI.getUserStats(wallet);
-        setUserStats(stats);
-      }
-    } catch (error) {
-      console.error('Failed to connect wallet:', error);
-      alert(error instanceof Error ? error.message : 'Failed to connect wallet');
-    }
-  };
+  // Wallet connect functionality removed - users now input wallet directly during score submission
 
   const getWhitelistStatus = (rank: number) => {
     if (rank <= 10) return { eligible: true, tier: 'LEGENDARY' };
@@ -406,10 +393,6 @@ export default function Leaderboard({ onClose }: LeaderboardProps) {
                 Total games played: {userStats.totalGames}
               </p>
             </>
-          ) : userWallet ? (
-            <p style={{ color: '#ffff00', textAlign: 'center' }}>
-              No scores recorded yet. Play a game to get on the leaderboard!
-            </p>
           ) : (
             <>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '1rem' }}>
@@ -430,22 +413,9 @@ export default function Leaderboard({ onClose }: LeaderboardProps) {
                   <div style={{ color: '#00ff00', fontSize: '1.5rem', fontWeight: 'bold' }}>--%</div>
                 </div>
               </div>
-              <button
-                onClick={connectWallet}
-                style={{
-                  background: 'linear-gradient(45deg, #ff00ff, #00ffff)',
-                  border: 'none',
-                  borderRadius: '10px',
-                  padding: '0.75rem 2rem',
-                  color: '#ffffff',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  marginTop: '1rem',
-                  width: '100%'
-                }}
-              >
-                Connect Satoshi Browser Wallet
-              </button>
+              <p style={{ color: '#ffff00', textAlign: 'center', marginTop: '1rem' }}>
+                Play a game and submit your score to get on the leaderboard!
+              </p>
             </>
           )}
         </motion.div>

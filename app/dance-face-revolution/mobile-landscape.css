@@ -1,0 +1,269 @@
+/* Mobile Landscape Mode Styles for Dance Face Revolution */
+
+/* Force landscape orientation on mobile */
+@media screen and (max-width: 768px) and (orientation: portrait) {
+  .mobile-rotate-prompt {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0a0a2e;
+    z-index: 9999;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: #00ffff;
+    font-size: 1.5rem;
+    text-align: center;
+    padding: 20px;
+  }
+
+  .mobile-rotate-prompt .rotate-icon {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+    animation: rotate-phone 2s ease-in-out infinite;
+  }
+
+  @keyframes rotate-phone {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(90deg); }
+  }
+
+  .mobile-rotate-prompt h2 {
+    color: #ff00ff;
+    text-shadow: 0 0 20px #ff00ff;
+    margin-bottom: 10px;
+  }
+
+  /* Hide all game content in portrait mode */
+  .dfr-container {
+    display: none !important;
+  }
+}
+
+/* Mobile Landscape Layout */
+@media screen and (max-width: 812px) and (orientation: landscape) {
+  /* Adjust main container for landscape */
+  .dfr-container {
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+  }
+
+  /* Touch control zones for mobile */
+  .mobile-touch-controls {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30vh;
+    z-index: 100;
+    pointer-events: auto;
+  }
+
+  .touch-arrow-zone {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .touch-arrow-button {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    border: 3px solid;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 30px;
+    color: white;
+    position: relative;
+    transition: all 0.1s;
+    touch-action: manipulation;
+  }
+
+  .touch-arrow-button.left {
+    border-color: #ff00ff;
+    box-shadow: 0 0 20px rgba(255, 0, 255, 0.5);
+  }
+
+  .touch-arrow-button.down {
+    border-color: #00ffff;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  }
+
+  .touch-arrow-button.up {
+    border-color: #ffff00;
+    box-shadow: 0 0 20px rgba(255, 255, 0, 0.5);
+  }
+
+  .touch-arrow-button.right {
+    border-color: #00ff00;
+    box-shadow: 0 0 20px rgba(0, 255, 0, 0.5);
+  }
+
+  /* Active state for touch */
+  .touch-arrow-button.active {
+    transform: scale(1.2);
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .touch-arrow-button.active.left {
+    box-shadow: 0 0 40px rgba(255, 0, 255, 1);
+    background: rgba(255, 0, 255, 0.3);
+  }
+
+  .touch-arrow-button.active.down {
+    box-shadow: 0 0 40px rgba(0, 255, 255, 1);
+    background: rgba(0, 255, 255, 0.3);
+  }
+
+  .touch-arrow-button.active.up {
+    box-shadow: 0 0 40px rgba(255, 255, 0, 1);
+    background: rgba(255, 255, 0, 0.3);
+  }
+
+  .touch-arrow-button.active.right {
+    box-shadow: 0 0 40px rgba(0, 255, 0, 1);
+    background: rgba(0, 255, 0, 0.3);
+  }
+
+  /* Adjust game UI for mobile landscape */
+  .game-ui {
+    font-size: 0.8rem;
+  }
+
+  .score-display {
+    top: 10px;
+    left: 10px;
+    font-size: 1rem;
+  }
+
+  .combo-display {
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+  }
+
+  .gauge-container {
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 20px;
+  }
+
+  /* Adjust canvas for landscape mobile */
+  canvas {
+    width: 100vw !important;
+    height: 70vh !important;
+    touch-action: none;
+  }
+
+  /* Start screen adjustments */
+  .start-screen {
+    padding: 10px;
+  }
+
+  .start-screen h1 {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+
+  .song-selection {
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+
+  .song-card {
+    padding: 10px;
+    margin: 5px;
+  }
+
+  .difficulty-buttons {
+    flex-wrap: nowrap;
+    gap: 5px;
+  }
+
+  .difficulty-btn {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  /* Results screen adjustments */
+  .results-screen {
+    padding: 10px;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .results-title {
+    font-size: 1.5rem;
+    margin: 10px 0;
+  }
+
+  .results-stats {
+    font-size: 0.9rem;
+  }
+
+  .judgment-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 5px;
+    margin: 10px 0;
+  }
+
+  .judgment {
+    padding: 5px;
+    font-size: 0.8rem;
+  }
+
+  /* Leaderboard adjustments */
+  .leaderboard-modal {
+    width: 90vw;
+    max-height: 80vh;
+    padding: 10px;
+  }
+
+  .leaderboard-entry {
+    font-size: 0.8rem;
+    padding: 5px;
+  }
+}
+
+/* Hide desktop-only elements on mobile */
+@media screen and (max-width: 812px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+/* Show mobile-only elements */
+@media screen and (min-width: 813px) {
+  .mobile-touch-controls,
+  .mobile-rotate-prompt {
+    display: none !important;
+  }
+}
+
+/* Prevent zooming on mobile */
+@media screen and (max-width: 812px) {
+  * {
+    touch-action: manipulation;
+  }
+
+  input, textarea, select {
+    font-size: 16px !important;
+  }
+}
