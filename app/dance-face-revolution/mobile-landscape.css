@@ -51,16 +51,20 @@
 
 /* Mobile Landscape Layout */
 @media screen and (max-width: 812px) and (orientation: landscape) {
-  /* Force correct background for mobile */
+  /* Force correct background and scrolling for mobile */
   body {
     background: #0a0a2e !important;
+    overflow: auto !important; /* Override global overflow hidden */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
   }
 
   /* Adjust main container for landscape */
   .dfr-container {
-    height: 100vh;
+    height: auto !important; /* Allow container to expand */
+    min-height: 100vh !important;
     width: 100vw;
-    overflow: hidden;
+    overflow: visible !important; /* Allow content to be scrollable */
     background: #0a0a2e !important; /* Force game background on mobile */
     display: block !important; /* Ensure container is visible */
   }
@@ -187,15 +191,15 @@
   /* Start screen adjustments - CRITICAL FOR MOBILE */
   .start-screen {
     padding: 5px !important;
-    min-height: 100vh !important;
-    max-height: 100vh !important;
-    overflow-y: auto !important;
+    min-height: auto !important; /* Don't force 100vh */
+    height: auto !important;
+    max-height: none !important; /* Allow expansion */
+    overflow-y: visible !important; /* Allow page scroll */
     overflow-x: hidden !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
+    position: relative !important; /* Not fixed so it scrolls with page */
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
 
   .start-screen h1 {
@@ -208,16 +212,21 @@
     display: none !important;
   }
 
+  /* Make song selection super compact */
   .song-selection {
-    max-height: 30vh !important;
+    max-height: 25vh !important; /* Even smaller */
     overflow-y: auto !important;
     width: 100% !important;
+    margin: 5px 0 !important;
   }
 
   .song-card {
-    padding: 5px !important;
-    margin: 3px !important;
+    padding: 3px !important; /* Minimal padding */
+    margin: 2px !important;
     min-height: auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
   }
 
   .song-card h3 {
@@ -310,9 +319,21 @@
 
 /* Hide desktop-only elements on mobile */
 @media screen and (max-width: 812px) {
-  /* Force correct background for all mobile devices */
-  body {
+  /* Force correct background and scrolling for all mobile devices */
+  html, body {
     background: #0a0a2e !important;
+    overflow: auto !important; /* Critical - allow scrolling */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;
+    min-height: 100vh !important;
+  }
+
+  /* Allow main container to scroll */
+  main, .dfr-container {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 100vh !important;
   }
 
   .desktop-only {
